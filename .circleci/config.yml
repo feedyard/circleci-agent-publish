@@ -20,7 +20,7 @@ workflows:
             - orb-tools/pack
 
       - orb-tools/trigger-integration-workflow:
-          context:
+          context: ci
           name: trigger-integration-dev
           ssh-fingerprints: $CI_FINGERPRINT
           cleanup-tags: true
