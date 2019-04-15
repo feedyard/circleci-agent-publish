@@ -5,7 +5,7 @@ jobs:
     steps:
       - checkout
       - setup_remote_docker
-      - common-tasks/decrypt-env
+      # - common-tasks/decrypt-env
       - run:
           name: validate yaml
           command: yamllint .
