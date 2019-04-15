@@ -1,0 +1,30 @@
+jobs:
+
+  dev-release:
+    executor: circleci-orb-agent
+    steps:
+      - checkout
+      - setup_remote_docker
+      - common-tasks/decrypt-env
+      - run:
+          name: validate yaml
+          command: yamllint .
+      - run:
+          name: validate orbs
+          command: |
+            for ORB in src/*; do
+              echo "Validating $ORB"
+              circleci orb validate $ORB/orb.yaml
+            done
+      - run:
+          name: SHA1/latest development release
+          command: |
+            for ORB in src/*; do
+              orbname=$(basename $ORB)
+              circleci orb source $CIRCLE_PROJECT_USERNAME/$orbname@dev:latest > $orbname.latest
+              if [[ $(diff <(printf %s "$(< $ORB/orb.yaml)") <(printf %s "$(< $orbname.latest)")) ]]; then
+                echo "dev-release of $CIRCLE_PROJECT_USERNAME/$orbname"
+                circleci orb publish $ORB/orb.yaml $CIRCLE_PROJECT_USERNAME/$orbname@dev:$CIRCLE_SHA1 --token $CIRCLECI_API_TOKEN
+                circleci orb publish $ORB/orb.yaml $CIRCLE_PROJECT_USERNAME/$orbname@dev:latest --token $CIRCLECI_API_TOKEN
+              fi
+            done

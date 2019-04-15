@@ -1,0 +1,67 @@
+examples:
+
+  standard_workflow:
+    description: |
+      A standard TBD circleci docker agent pipeline workflow, where git push triggers build and push.
+      Dockerfile is in the root of your repository, image name is same name as your repository, and
+      pushing to a default docker registry.
+
+    usage:
+      version: 2.1
+
+      orbs:
+        circle-agent: feedyard/circleci-agent-publish@1.0.0
+
+      workflows:
+        circleci-remote-docker-image-pipeline:
+          jobs:
+            - circle-agent/dev-release:
+                filters:
+                  branches:
+                    only: master
+                  tags:
+                    ignore: /.*/
+            - circle-agent/publish:
+                filters:
+                  branches:
+                    ignore: /.*/
+                  tags:
+                    only: /.*/
+
+  using_custom_values:
+    description: Build and push docker image to a custom registry with a custom name and tag.
+    usage:
+      version: 2.1
+
+      orbs:
+        circle-agent: feedyard/circleci-agent-publish@1.0.0
+
+      workflows:
+        build_and_release_docker_image:
+          jobs:
+            - circle-agent/dev-release:
+                registry: my.docker.registry
+                image: my/image
+                tag: my_tag
+
+  life_cycle_hooks:
+    description: Build, TEST, and push a docker image using custom lifecycle hooks.
+    usage:
+      version: 2.1
+
+      orbs:
+        circle-agent: feedyard/circleci-agent-publish@1.0.0
+
+      workflows:
+        docker_with_lifecycle:
+          jobs:
+            - circle-agent/dev-release:
+                after_build:
+                  - run:
+                      name: configuration testing of the image
+                      command: |
+                        set -euo pipefail
+                        inspec exec --no-distinct-exit profiles/cis-docker
+                        CID="$(docker run -it -d --entrypoint bash quay.io/feedyard/circleci-remote-docker:$CIRCLE_SHA1)"
+                        inspec exec profiles/circleci-remote-docker/ -t docker://$CID
+                        docker rm -f $CID

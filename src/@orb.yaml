@@ -1,0 +1,36 @@
+---
+version: 2.1
+
+description: |
+  Standard jobs for building and publishing custom circleci docker executor images. Assumes DOCKER_LOGIN and
+  DOCKER_PASSWORD Environment variables are defined. See https://github.com/feedyard/circleci-remote-docker for an
+  example test configuration. Incorporates concepts from circleci/docker-publish@0.1.2.
+
+orbs:
+  orb-tools: circleci/orb-tools@8.5.0
+
+# standard definitions for use in triggering workflows
+#
+# triggers on git push of changes to any non-master branch
+merge-branch-filter: &merge-branch-filter
+  filters:
+    branches:
+      ignore: master
+    tags:
+      ignore: /.*/
+
+# triggers on git push of changes to master branch
+merge-master-filter: &merge-master-filter
+  filters:
+    branches:
+      only: master
+    tags:
+      ignore: /.*/
+
+# trigger only git push of any tag
+tag-master-filter: &tag-master-filter
+  filters:
+    branches:
+      ignore: /.*/
+    tags:
+      only: /.*/

@@ -1,0 +1,27 @@
+commands:
+
+  check-registry:
+    description: |
+      confirm $DOCKER_LOGIN and $DOCKER_PASSWORD environment variables are set and
+      run docker login to ensure that you can push the build image
+    parameters:
+      registry:
+        description: Docker registry
+        type: string
+        default: docker.io
+    steps:
+      - run:
+          name: Confirm Docker registry environment variables are configured and correct
+          command: |
+            if [[ -z "${DOCKER_LOGIN}" ]]; then
+              echo "DOCKER_LOGIN is not set, will not be able to push image."
+              exit 1
+            fi
+
+            if [[ -z "${DOCKER_PASSWORD}" ]]; then
+              echo "DOCKER_PASSWORD is not set, will not be able to push image."
+              exit 1
+            fi
+      - run:
+          name: Confirm Docker registry login
+          command: echo "$DOCKER_PASSWORD" | docker login -u $DOCKER_LOGIN --password-stdin << parameters.registry >>
