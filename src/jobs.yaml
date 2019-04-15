@@ -1,7 +1,6 @@
 jobs:
 
   dev-release:
-    executor: circleci-orb-agent
     steps:
       - checkout
       - setup_remote_docker
