@@ -10,10 +10,12 @@ workflows:
 
     jobs:
       - circle-compare-url/reconstruct:
+          name: first
           context: ci
           circle-token: CIRCLE_TOKEN
-      - post-message
-      - calc
+      - calc:
+          requires:
+            - first
 
 
 executors:
@@ -24,15 +26,6 @@ executors:
       - image: quay.io/feedyard/circleci-base-agent
 
 jobs:
-
-  post-message:
-    description: just echo a message
-    executor: circleci-base-agent
-    steps:
-      - run:
-          name: the echo
-          command: echo 'simple post message test'
-
   calc:
     description: do the commit calculation
     executor: circleci-base-agent
