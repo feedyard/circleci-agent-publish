@@ -2,7 +2,7 @@ jobs:
 
   build-release:
     description: Check, build, and optionally deploy a Docker image.
-    executor: docker
+    executor: circleci-base-agent
     parameters:
       dockerfile:
         description: Name of dockerfile to use. Defaults to Dockerfile.
@@ -46,26 +46,26 @@ jobs:
       - checkout
       - when:
           name: Run after_checkout lifecycle hook steps.
-          condition: << parameters.after_checkout >>
-          steps: << parameters.after_checkout >>
+          condition: << parameters.after-checkout >>
+          steps: << parameters.after-checkout >>
       - setup_remote_docker
       - check-registry:
           registry: << parameters.registry >>
       - when:
           name: Run before_build lifecycle hook steps.
-          condition: << parameters.before_build >>
-          steps: << parameters.before_build >>
+          condition: << parameters.before-build >>
+          steps: << parameters.before-build >>
       - build:
           dockerfile: << parameters.dockerfile >>
           path: << parameters.path >>
           image: << parameters.image >>
           tag: << parameters.tag >>
           registry: << parameters.registry >>
-          extra_build_args: << parameters.extra_build_args >>
+          extra-build-args: << parameters.extra-build-args >>
       - when:
           name: Run after_build lifecycle hook steps.
-          condition: << parameters.after_build >>
-          steps: << parameters.after_build >>
+          condition: << parameters.after-build >>
+          steps: << parameters.after-build >>
       - push:
           registry: << parameters.registry >>
           image: << parameters.image >>

@@ -60,7 +60,7 @@ commands:
           name: Build Docker Image
           command: |
             docker build \
-              <<#parameters.extra_build_args>><<parameters.extra_build_args>><</parameters.extra_build_args>> \
+              <<#parameters.extra-build-args>><<parameters.extra-build-args>><</parameters.extra-build-args>> \
               -f << parameters.dockerfile >> -t \
               << parameters.registry >>/<< parameters.image >>:<< parameters.tag >> \
               << parameters.path >>
@@ -88,18 +88,17 @@ commands:
         description: Value for tag to use. Defaults to $CIRCLE_SHA1.
         type: string
         default: $CIRCLE_SHA1
-
     steps:
       - when:
           name: Publish a SHA tagged image?
-          condition: << paramters.incremental-builds >>
+          condition: << parameters.incremental-builds >>
           steps:
             - run:
                 name: push SHA tag
                 command: docker push << parameters.registry >>/<< parameters.image >>:<< parameters.tag >>
       - when:
           name: publish named release tag (such as edge or daily)?
-          condition: << paramters.release >>
+          condition: << parameters.release >>
           steps:
             - run:
                 name: tag the last build

@@ -1,0 +1,269 @@
+commands:
+  build:
+    description: Builds Docker Image.
+    parameters:
+      dockerfile:
+        default: Dockerfile
+        description: Name of dockerfile to use. Defaults to Dockerfile.
+        type: string
+      extra-build-args:
+        default: ""
+        description: |
+          Extra flags to pass to docker build. For examples, see https://docs.docker.com/engine/reference/commandline/build
+        type: string
+      image:
+        default: $CIRCLE_PROJECT_REPONAME
+        description: Name of image to create. Defaults to a combination of $CIRCLE_PROJECT_REPONAME.
+        type: string
+      path:
+        default: .
+        description: Path to the directory containing your Dockerfile and build context.
+          Defaults to . (working directory).
+        type: string
+      registry:
+        default: docker.io
+        description: Name of registry to use. Defaults to docker.io.
+        type: string
+      tag:
+        default: $CIRCLE_SHA1
+        description: Value for tag to use. Defaults to $CIRCLE_SHA1.
+        type: string
+    steps:
+    - run:
+        command: |
+          docker build \
+            <<#parameters.extra-build-args>><<parameters.extra-build-args>><</parameters.extra-build-args>> \
+            -f << parameters.dockerfile >> -t \
+            << parameters.registry >>/<< parameters.image >>:<< parameters.tag >> \
+            << parameters.path >>
+        name: Build Docker Image
+  check-registry:
+    description: |
+      confirm $DOCKER_LOGIN and $DOCKER_PASSWORD environment variables are set and
+      run docker login to ensure that you can push the build image
+    parameters:
+      registry:
+        default: docker.io
+        description: Docker registry
+        type: string
+    steps:
+    - run:
+        command: |
+          if [[ -z "${DOCKER_LOGIN}" ]]; then
+            echo "DOCKER_LOGIN is not set, will not be able to push image."
+            exit 1
+          fi
+
+          if [[ -z "${DOCKER_PASSWORD}" ]]; then
+            echo "DOCKER_PASSWORD is not set, will not be able to push image."
+            exit 1
+          fi
+        name: Confirm Docker registry environment variables are configured and correct
+    - run:
+        command: echo "$DOCKER_PASSWORD" | docker login -u $DOCKER_LOGIN --password-stdin
+          << parameters.registry >>
+        name: Confirm Docker registry login
+  push:
+    description: Deploy docker image to a registry.
+    parameters:
+      image:
+        default: $CIRCLE_PROJECT_REPONAME
+        description: Name of image to create. Defaults to a combination of $CIRCLE_PROJECT_REPONAME.
+        type: string
+      incremental-builds:
+        default: false
+        description: Push each build as $CIRCLE_SHA1?
+        type: boolean
+      registry:
+        default: docker.io
+        description: Name of registry to use. Defaults to docker.io.
+        type: string
+      release:
+        default: $CIRCLE_SHA1
+        description: Value for tag to use. Defaults to $CIRCLE_SHA1.
+        type: string
+      tag:
+        default: $CIRCLE_SHA1
+        description: Value for tag to use. Defaults to $CIRCLE_SHA1.
+        type: string
+    steps:
+    - when:
+        condition: << parameters.incremental-builds >>
+        name: Publish a SHA tagged image?
+        steps:
+        - run:
+            command: docker push << parameters.registry >>/<< parameters.image >>:<<
+              parameters.tag >>
+            name: push SHA tag
+    - when:
+        condition: << parameters.release >>
+        name: publish named release tag (such as edge or daily)?
+        steps:
+        - run:
+            name: tag the last build
+    - run:
+        command: |-
+          if [[ $CIRCLE_NODE_INDEX == 0 ]]; then
+            docker push << parameters.registry >>/<< parameters.image >>
+          fi
+        name: Push Docker Image
+description: |
+  Standard jobs for building and publishing custom circleci docker executor images. Assumes DOCKER_LOGIN and
+  DOCKER_PASSWORD Environment variables are defined. See https://github.com/feedyard/circleci-remote-docker for an
+  example test configuration. Incorporates concepts from circleci/docker-publish@0.1.2.
+examples:
+  life_cycle_hooks:
+    description: Build, TEST, and push a docker image using custom lifecycle hooks.
+    usage:
+      orbs:
+        circle-agent: feedyard/circleci-agent-publish@1.0.0
+      version: 2.1
+      workflows:
+        docker_with_lifecycle:
+          jobs:
+          - circle-agent/dev-release:
+              after_build:
+              - run:
+                  command: |
+                    set -euo pipefail
+                    inspec exec --no-distinct-exit profiles/cis-docker
+                    CID="$(docker run -it -d --entrypoint bash quay.io/feedyard/circleci-remote-docker:$CIRCLE_SHA1)"
+                    inspec exec profiles/circleci-remote-docker/ -t docker://$CID
+                    docker rm -f $CID
+                  name: configuration testing of the image
+  standard_workflow:
+    description: |
+      A standard TBD circleci docker agent pipeline workflow, where git push triggers build and push.
+      Dockerfile is in the root of your repository, image name is same name as your repository, and
+      pushing to a default docker registry.
+    usage:
+      orbs:
+        circle-agent: feedyard/circleci-agent-publish@1.0.0
+      version: 2.1
+      workflows:
+        circleci-remote-docker-image-pipeline:
+          jobs:
+          - circle-agent/dev-release:
+              filters:
+                branches:
+                  only: master
+                tags:
+                  ignore: /.*/
+          - circle-agent/publish:
+              filters:
+                branches:
+                  ignore: /.*/
+                tags:
+                  only: /.*/
+  using_custom_values:
+    description: Build and push docker image to a custom registry with a custom name
+      and tag.
+    usage:
+      orbs:
+        circle-agent: feedyard/circleci-agent-publish@1.0.0
+      version: 2.1
+      workflows:
+        build_and_release_docker_image:
+          jobs:
+          - circle-agent/dev-release:
+              image: my/image
+              registry: my.docker.registry
+              tag: my_tag
+executors:
+  circleci-base-agent:
+    description: The docker container to use when running circleci-agent-publish jobs
+    docker:
+    - image: quay.io/feedyard/circleci-base-agent
+jobs:
+  build-release:
+    description: Check, build, and optionally deploy a Docker image.
+    executor: circleci-base-agent
+    parameters:
+      after-build:
+        default: []
+        description: Optional steps to run after building the docker image.
+        type: steps
+      after-checkout:
+        default: []
+        description: Optional steps to run after checking out the code.
+        type: steps
+      before-build:
+        default: []
+        description: Optional steps to run before building the docker image.
+        type: steps
+      dockerfile:
+        default: Dockerfile
+        description: Name of dockerfile to use. Defaults to Dockerfile.
+        type: string
+      extra-build-args:
+        default: ""
+        description: |
+          Extra flags to pass to docker build. For examples, see https://docs.docker.com/engine/reference/commandline/build
+        type: string
+      image:
+        default: $CIRCLE_PROJECT_REPONAME
+        description: Name of image to create. Defaults to a combination of $CIRCLE_PROJECT_REPONAME.
+        type: string
+      path:
+        default: .
+        description: Path to the directory containing your Dockerfile and build context.
+          Defaults to . (working directory).
+        type: string
+      registry:
+        default: docker.io
+        description: Name of registry to use. Defaults to docker.io.
+        type: string
+      tag:
+        default: $CIRCLE_SHA1
+        description: Value for tag to use. Defaults to $CIRCLE_SHA1.
+        type: string
+    steps:
+    - checkout
+    - when:
+        condition: << parameters.after-checkout >>
+        name: Run after_checkout lifecycle hook steps.
+        steps: << parameters.after-checkout >>
+    - setup_remote_docker
+    - check-registry:
+        registry: << parameters.registry >>
+    - when:
+        condition: << parameters.before-build >>
+        name: Run before_build lifecycle hook steps.
+        steps: << parameters.before-build >>
+    - build:
+        dockerfile: << parameters.dockerfile >>
+        extra-build-args: << parameters.extra-build-args >>
+        image: << parameters.image >>
+        path: << parameters.path >>
+        registry: << parameters.registry >>
+        tag: << parameters.tag >>
+    - when:
+        condition: << parameters.after-build >>
+        name: Run after_build lifecycle hook steps.
+        steps: << parameters.after-build >>
+    - push:
+        image: << parameters.image >>
+        registry: << parameters.registry >>
+        release: edge
+merge-branch-filter:
+  filters:
+    branches:
+      ignore: master
+    tags:
+      ignore: /.*/
+merge-master-filter:
+  filters:
+    branches:
+      only: master
+    tags:
+      ignore: /.*/
+orbs:
+  orb-tools: circleci/orb-tools@8.5.0
+tag-master-filter:
+  filters:
+    branches:
+      ignore: /.*/
+    tags:
+      only: /.*/
+version: 2.1
+
