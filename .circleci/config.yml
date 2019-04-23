@@ -12,7 +12,7 @@ workflows:
       - circle-compare-url/reconstruct:
           context: ci
           circle-token: CIRCLE_TOKEN
-      - test-commmand
+      - test-command
 
 commands:
   test-command:
