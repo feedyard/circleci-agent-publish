@@ -2,6 +2,7 @@ jobs:
 
   build-release:
     description: Check, build, and optionally deploy a Docker image.
+    context: ci
     executor: circleci-base-agent
     parameters:
       dockerfile:
