@@ -11,7 +11,7 @@ workflows:
     jobs:
       - circle-compare-url/reconstruct:
           context: ci
-          circle-token: $CIRCLE_TOKEN
+          circle-token: CIRCLE_TOKEN
       - run:
           name: construct/push git integration tag
           command: |
