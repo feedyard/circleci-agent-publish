@@ -3,40 +3,74 @@ version: 2.1
 
 orbs:
   orb-tools: circleci/orb-tools@8.5.0
+  circle-compare-url: iynere/compare-url@0.4.10
 
 workflows:
   circleci-agent-publish-orb-pipeline:
 
     jobs:
-      - orb-tools/lint
+      - circle-compare-url/reconstruct:
+          circle-token: <<parameters.circle-token>>
+      - run:
 
-      - orb-tools/pack:
-          requires:
-            - orb-tools/lint
+          name: construct/push git integration tag
+          command: |
+            CIRCLE_COMPARE_URL=$(cat CIRCLE_COMPARE_URL.txt)
 
-      - orb-tools/publish-dev:
-          orb-name: feedyard/circleci-agent-publish
-          requires:
-            - orb-tools/pack
+            COMMIT_RANGE=$(echo $CIRCLE_COMPARE_URL | sed 's:^.*/compare/::g')
 
-      - orb-tools/trigger-integration-workflow:
-          context: ci
-          name: trigger-integration-dev
-          ssh-fingerprints: $CI_FINGERPRINT
-          cleanup-tags: true
-          requires:
-            - orb-tools/publish-dev
-          filters:
-            branches:
-              only: master
+            echo "Commit range: $COMMIT_RANGE"
 
-      - orb-tools/trigger-integration-workflow:
-          name: trigger-integration-master
-          ssh-fingerprints: $CI_FINGERPRINT
-          cleanup-tags: true
-          tag: master
-          requires:
-            - orb-tools/publish-dev
-          filters:
-            branches:
-              only: master
+            # only publish a major release if there are new jobs or commands
+            if [[ $(git diff $COMMIT_RANGE --name-status | \
+              grep -e "A      src/commands" -e "A      src/jobs") ]]; then
+              INTEGRATION_TAG=<<parameters.tag>>-major-$CIRCLE_BRANCH-${CIRCLE_SHA1:0:7}
+
+            # publish a minor release if there are other changes to jobs or commands
+            elif [[ $(git diff $COMMIT_RANGE --name-status | \
+              grep -e "src/commands" -e "src/jobs") ]]; then
+              INTEGRATION_TAG=<<parameters.tag>>-minor-$CIRCLE_BRANCH-${CIRCLE_SHA1:0:7}
+
+            # patch release if any changers to examples, executors, @orb.yml
+            elif [[ $(git diff $COMMIT_RANGE --name-status | \
+              grep -e "src/examples" -e "src/executors" -e "src/@orb.yml") ]]; then
+              INTEGRATION_TAG=<<parameters.tag>>-patch-$CIRCLE_BRANCH-${CIRCLE_SHA1:0:7}
+
+            # otherwise, don't publish a release
+            else
+              INTEGRATION_TAG=<<parameters.tag>>-skip-$CIRCLE_BRANCH-${CIRCLE_SHA1:0:7}
+            fi
+
+            echo $INTEGRATION_TAG
+#      - orb-tools/lint
+#
+#      - orb-tools/pack:
+#          requires:
+#            - orb-tools/lint
+#
+#      - orb-tools/publish-dev:
+#          orb-name: feedyard/circleci-agent-publish
+#          requires:
+#            - orb-tools/pack
+#
+#      - orb-tools/trigger-integration-workflow:
+#          context: ci
+#          name: trigger-integration-dev
+#          ssh-fingerprints: $CI_FINGERPRINT
+#          cleanup-tags: true
+#          requires:
+#            - orb-tools/publish-dev
+#          filters:
+#            branches:
+#              only: master
+#
+#      - orb-tools/trigger-integration-workflow:
+#          name: trigger-integration-master
+#          ssh-fingerprints: $CI_FINGERPRINT
+#          cleanup-tags: true
+#          tag: master
+#          requires:
+#            - orb-tools/publish-dev
+#          filters:
+#            branches:
+#              only: master
