@@ -12,6 +12,11 @@ workflows:
       - circle-compare-url/reconstruct:
           context: ci
           circle-token: CIRCLE_TOKEN
+      - test-commmand
+
+commands:
+  test-command:
+    steps:
       - run:
           name: construct/push git integration tag
           command: |
@@ -42,7 +47,6 @@ workflows:
             fi
 
             echo $INTEGRATION_TAG
-
 
 
 #      - orb-tools/lint
