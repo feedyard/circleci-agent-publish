@@ -19,6 +19,7 @@ jobs:
 
   post-message:
     description: just echo a message
+    executor: circleci-base-agent
     steps:
       - run:
           name: the echo
@@ -26,6 +27,7 @@ jobs:
 
   calc:
     description: do the commit calculation
+    executor: circleci-base-agent
     steps:
       - run:
           name: construct/push git integration tag
