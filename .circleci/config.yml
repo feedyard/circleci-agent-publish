@@ -12,9 +12,20 @@ workflows:
       - circle-compare-url/reconstruct:
           context: ci
           circle-token: CIRCLE_TOKEN
+      - post-message
+      - calc
 
 commands:
-  test-command:
+
+  post-message:
+    description: just echo a message
+    steps:
+      - run:
+          name: the echo
+          command: echo 'simple post message test'
+
+  calc:
+    description: do the commit calculation
     steps:
       - run:
           name: construct/push git integration tag
