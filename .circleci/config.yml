@@ -15,7 +15,7 @@ workflows:
       - post-message
       - calc
 
-commands:
+jobs:
 
   post-message:
     description: just echo a message
