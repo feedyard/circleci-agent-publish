@@ -64,12 +64,12 @@ parameters:
 
 steps:
   - checkout
+  - - setup_remote_docker
   - lint
   - when:
       name: Run after_checkout lifecycle hook steps.
       condition: << parameters.after-checkout >>
       steps: << parameters.after-checkout >>
-  - setup_remote_docker
   - confirm-registry:
       registry: << parameters.registry >>
       registry-login: << parameters.registry-login >>
