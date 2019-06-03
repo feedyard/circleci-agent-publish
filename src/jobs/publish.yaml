@@ -42,6 +42,7 @@ parameters:
 
 steps:
   - checkout
+  - setup_remote_docker
   - confirm-registry:
       registry: << parameters.registry >>
       registry-login: << parameters.registry-login >>
