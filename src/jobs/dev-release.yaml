@@ -64,7 +64,7 @@ parameters:
 
 steps:
   - checkout
-  - - setup_remote_docker
+  - setup_remote_docker
   - lint
   - when:
       name: Run after_checkout lifecycle hook steps.
