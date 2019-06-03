@@ -1,0 +1,27 @@
+# src/commands/tag.yaml
+
+description: tag docker image
+
+parameters:
+
+  registry:
+    description: Name of registry
+    type: string
+    default: docker.io
+
+  image:
+    description: Name of image
+    type: string
+
+  tag:
+    description: Value for tag
+    type: string
+
+  release:
+    description: Value for tag
+    type: string
+
+steps:
+  - run:
+      name: tag an existing local image to publish
+      command: docker tag << parameters.registry >>/<< parameters.image >>:<< parameters.tag >> << parameters.registry >>/<< parameters.image >>:<< parameters.release >>

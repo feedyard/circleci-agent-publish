@@ -1,0 +1,19 @@
+# src/executors/circleci-base-agent.yaml
+
+description: >
+  Alpine Linux-based circleci primary container, based on feedyard/circleci-remote-docker. includes common tools for
+  building and testing docker images used for infrastructure-as-code pipelines.
+
+  https://quay.io/repository/feedyard/circleci-base-agent
+  https://github.com/feedyard/circleci-base-agent
+
+parameters:
+  resource-class:
+    type: enum
+    default: medium
+    enum: [small, medium, medium+, large, xlarge]
+
+resource_class: <<parameters.resource-class>>
+
+docker:
+  - image: quay.io/feedyard/circleci-base-agent

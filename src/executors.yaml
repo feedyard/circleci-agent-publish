@@ -1,6 +1,0 @@
-executors:
-
-  circleci-base-agent:
-    description: The docker container to use when running circleci-agent-publish jobs
-    docker:
-      - image: quay.io/feedyard/circleci-base-agent

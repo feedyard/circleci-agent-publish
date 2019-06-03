@@ -2,88 +2,91 @@
 version: 2.1
 
 orbs:
-  orb-tools: circleci/orb-tools@8.5.0
-  circle-compare-url: iynere/compare-url@0.4.10
+  orb-tools: feedyard/orb-tools@2.0.2
+
+# yaml anchor filters
+dev-release-filter: &dev-release-filter
+  branches:
+    only: /master/
+  tags:
+    ignore: /.*/
+
+patch-tag-publish-filter: &patch-tag-publish-filter
+  branches:
+    ignore: /.*/
+  tags:
+    only: /^patch.*/
+
+minor-tag-publish-filter: &minor-tag-publish-filter
+  branches:
+    ignore: /.*/
+  tags:
+    only: /^minor.*/
+
+major-tag-publish-filter: &major-tag-publish-filter
+  branches:
+    ignore: /.*/
+  tags:
+    only: /^major.*/
+
 
 workflows:
-  circleci-agent-publish-orb-pipeline:
-
+  dev-release-executor-tools:
     jobs:
-      test-git-diff:
-        description: test
-        executor: circleci-base-agent
-        context: ci
-        steps:
-          - circle-compare-url/reconstruct:
-              circle-token: CIRCLE_TOKEN
-          - run:
-              name: construct/push git integration tag
-              command: |
-                CIRCLE_COMPARE_URL=$(cat CIRCLE_COMPARE_URL.txt)
+      - orb-tools/lint:
+          use-default-rules: true
+          filters: *dev-release-filter
 
-                COMMIT_RANGE=$(echo $CIRCLE_COMPARE_URL | sed 's:^.*/compare/::g')
+      - orb-tools/validate:
+          filters: *dev-release-filter
+          requires:
+            - orb-tools/lint
 
-                echo "Commit range: $COMMIT_RANGE"
+      - orb-tools/publish-dev:
+          context: orb-publishing
+          orb-name: feedyard/executor-tools
+          filters: *dev-release-filter
+          requires:
+            - orb-tools/validate
 
-                # only publish a major release if there are new jobs or commands
-                if [[ $(git diff $COMMIT_RANGE --name-status | \
-                  grep -e "A      src/commands" -e "A      src/jobs") ]]; then
-                  INTEGRATION_TAG=tag-major-$CIRCLE_BRANCH-${CIRCLE_SHA1:0:7}
+      - approve-release:
+          type: approval
+          requires:
+            - orb-tools/publish-dev
+          filters: *dev-release-filter
 
-                # publish a minor release if there are other changes to jobs or commands
-                elif [[ $(git diff $COMMIT_RANGE --name-status | \
-                  grep -e "src/commands" -e "src/jobs") ]]; then
-                  INTEGRATION_TAG=tag-minor-$CIRCLE_BRANCH-${CIRCLE_SHA1:0:7}
+      - orb-tools/release-tag:
+          context: orb-publishing
+          ssh-fingerprints: $SVC_FINGERPRINT
+          filters: *dev-release-filter
+          requires:
+            - approve-release
 
-                # patch release if any changers to examples, executors, @orb.yml
-                elif [[ $(git diff $COMMIT_RANGE --name-status | \
-                  grep -e "src/examples" -e "src/executors" -e "src/@orb.yml") ]]; then
-                  INTEGRATION_TAG=tag-patch-$CIRCLE_BRANCH-${CIRCLE_SHA1:0:7}
+  promote-executor-tools:
+    jobs:
+      # patch, minor, or major publishing, depending on which orb source
+      # files have been modified (that logic lives in the
+      # release-tag job's source)
+      - orb-tools/promote-dev-to-prod:
+          name: patch-release
+          context: orb-publishing
+          release: patch
+          orb-name: feedyard/executor-tools
+          ssh-fingerprints: $SVC_FINGERPRINT
+          filters: *patch-tag-publish-filter
 
-                # otherwise, don't publish a release
-                else
-                  INTEGRATION_TAG=tag-skip-$CIRCLE_BRANCH-${CIRCLE_SHA1:0:7}
-                fi
+      - orb-tools/promote-dev-to-prod:
+          name: minor-release
+          context: orb-publishing
+          release: minor
+          orb-name: feedyard/executor-tools
+          ssh-fingerprints: $SVC_FINGERPRINT
+          filters: *minor-tag-publish-filter
 
-                echo $INTEGRATION_TAG
-
-
-executors:
-
-  circleci-base-agent:
-    description: The docker container to use when running circleci-agent-publish jobs
-    docker:
-      - image: quay.io/feedyard/circleci-base-agent
-
-#      - orb-tools/lint
-#
-#      - orb-tools/pack:
-#          requires:
-#            - orb-tools/lint
-#
-#      - orb-tools/publish-dev:
-#          orb-name: feedyard/circleci-agent-publish
-#          requires:
-#            - orb-tools/pack
-#
-#      - orb-tools/trigger-integration-workflow:
-#          context: ci
-#          name: trigger-integration-dev
-#          ssh-fingerprints: $CI_FINGERPRINT
-#          cleanup-tags: true
-#          requires:
-#            - orb-tools/publish-dev
-#          filters:
-#            branches:
-#              only: master
-#
-#      - orb-tools/trigger-integration-workflow:
-#          name: trigger-integration-master
-#          ssh-fingerprints: $CI_FINGERPRINT
-#          cleanup-tags: true
-#          tag: master
-#          requires:
-#            - orb-tools/publish-dev
-#          filters:
-#            branches:
-#              only: master
+      - orb-tools/promote-dev-to-prod:
+          name: major-release
+          context: orb-publishing
+          release: major
+          orb-name: feedyard/executor-tools
+          ssh-fingerprints: $SVC_FINGERPRINT
+          filters: *major-tag-publish-filter

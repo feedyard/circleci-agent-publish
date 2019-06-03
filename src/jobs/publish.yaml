@@ -1,0 +1,65 @@
+# src/jobs/publish.yaml
+
+description: Tag prior successful build as a release version
+
+executor: circleci-base-agent
+
+parameters:
+
+  registry:
+    description: Name of registry
+    type: string
+    default: docker.io
+
+  image:
+    description: Name of image
+    type: string
+
+  pull-tag:
+    description: Value for tag
+    type: string
+    default: $CIRCLE_SHA1
+
+  release:
+    description: Value for tag
+    type: string
+    default: $CIRCLE_TAG
+
+  registry-login:
+    description: username for reigstry access
+    type: env_var_name
+    default: DOCKER_LOGIN
+
+  registry-password:
+    description: password for registry access
+    type: env_var_name
+    default: DOCKER_PASSWORD
+
+  after-publish:
+    description: Optional steps to run after publishing the docker image.
+    type: steps
+    default: []
+
+steps:
+  - checkout
+  - confirm-registry:
+      registry: << parameters.registry >>
+      registry-login: << parameters.registry-login >>
+      registry-password: << parameters.registry-password >>
+  - pull:
+      registry: << parameters.registry >>
+      image: << parameters.image >>
+      tag: << parameters.pull-tag >>
+  - tag:
+      registry: << parameters.registry >>
+      image: << parameters.image >>
+      tag: << parameters.pull-tag >>
+      release: << parameters.release >>
+  - push:
+      registry: << parameters.registry >>
+      image: << parameters.image >>
+      tag: << parameters.release >>
+  - when:
+      name: Run after_publish lifecycle hook steps.
+      condition: << parameters.after-publish >>
+      steps: << parameters.after-publish >>

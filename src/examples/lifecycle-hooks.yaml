@@ -1,0 +1,49 @@
+# src/examples/lifecycle-hooks.yaml
+
+description: A standard TBD circleci docker agent pipeline workflow, where git push triggers build and push.
+
+usage:
+  version: 2.1
+
+  orbs:
+    executor-tools: feedyard/executor-tools@1.0.0
+    common: feedyard/common-pipeline-tasks@0.4.0
+
+  workflows:
+    version: 2
+
+    circleci-remote-docker-image-pipeline:
+      jobs:
+        - executor-tools/dev-release:
+            image: circleci-remote-docker
+            before-build:
+              - common/slack:
+                  title: Build notice
+                  message: 'a new build of the circleci-remote-docker image has started'
+                  webhook: SLACK_WEBHOOK
+            after-build:
+              - run:
+                  name: configuration testing of the image
+                  command: |
+                    set -euo pipefail
+                    inspec exec --no-distinct-exit profiles/cis-docker
+                    CID="$(docker run -it -d --entrypoint ash quay.io/feedyard/circleci-remote-docker:$CIRCLE_SHA1)"
+                    inspec exec profiles/circleci-remote-docker/ -t docker://$CID
+                    docker rm -f $CID
+            filters:
+              branches:
+                only: master
+              tags:
+                ignore: /.*/
+        - executor-tools/publish:
+            image: circleci-remote-docker
+            after-publish:
+              - common/slack:
+                  title: New Executor Version
+                  message: 'a new version of the circleci-remote-docker image has been published'
+                  webhook: SLACK_WEBHOOK
+            filters:
+              branches:
+                ignore: /.*/
+              tags:
+                only: /.*/

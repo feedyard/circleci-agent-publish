@@ -1,0 +1,39 @@
+# src/commands/confirm-registry.yaml
+
+description: |
+  confirm $DOCKER_LOGIN and $DOCKER_PASSWORD environment variables are set and
+  run docker login to ensure that you can push the build image
+
+parameters:
+
+  registry:
+    description: Docker registry
+    type: string
+    default: docker.io
+
+  registry-login:
+    description: username for reigstry access
+    type: env_var_name
+    default: DOCKER_LOGIN
+
+  registry-password:
+    description: password for registry access
+    type: env_var_name
+    default: DOCKER_PASSWORD
+
+steps:
+  - run:
+      name: Confirm Docker registry environment variables are configured and correct
+      command: |
+        if ( -z "${<< parameters.registry-login >>}" ); then
+          echo "registry access username is not set, will not be able to push image."
+          exit 1
+        fi
+
+        if ( -z "${<< parameters.registry-password >>}" ); then
+          echo "registry access password is not set, will not be able to push image."
+          exit 1
+        fi
+  - run:
+      name: Confirm Docker registry login
+      command: echo "<< parameters.registry-password >>" | docker login -u << parameters.registry-login >> --password-stdin << parameters.registry >>
