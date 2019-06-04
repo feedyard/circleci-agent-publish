@@ -18,7 +18,7 @@ parameters:
   pull-tag:
     description: Value for tag
     type: string
-    default: $CIRCLE_SHA1
+    default: dev.$CIRCLE_SHA1
 
   release:
     description: Value for tag
@@ -64,3 +64,6 @@ steps:
       name: Run after_publish lifecycle hook steps.
       condition: << parameters.after-publish >>
       steps: << parameters.after-publish >>
+
+
+  #DELETE https://quay.io/api/v1/repository/{repository}/tag/{tag}
