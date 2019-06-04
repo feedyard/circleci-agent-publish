@@ -1,0 +1,60 @@
+# src/commands/clean-quay.yaml
+
+description: Steps to clean up development tags from quay.io docker registry
+
+parameters:
+
+  registry:
+    description: Name of registry
+    type: string
+    default: quay.io
+
+  image:
+    description: Name of image
+    type: string
+
+  dev-tag:
+    description: >
+      Value for tag* to clean up. quay.io will automatically remove images with no tag references
+      either directly or indirectly through a parent child relationship
+    type: string
+    default: dev
+
+  api-url:
+    description: quay.io api url
+    type: string
+    default: https://quay.io/api/v1/repository
+
+  bearer-token:
+    description: quay.io API bearer token
+    type: env_var_name
+
+steps:
+  - run:
+      name: Confirm quay.io API bearer token environment variable is configured
+      command: |
+        if ( -z "${<< parameters.bearer-token >>}" ); then
+          echo "quay.io API bearer token is not set, will not be able to access quay.io api."
+          exit 1
+        fi
+  - run:
+      name: GET all repository tags
+      command: |
+        curl -i -H 'Accept: application/json' \
+                -H 'Content-Type: application/json' \
+                -H 'Authorization: Bearer ${<< parameters.bearer-token >>}' \
+                -X GET '<< parameters.api-url >>/<< parameters.image >>/image' \
+                > all_images.json
+  - run:
+      name: find development tagged images
+      command: |
+        cat all_images.json | jq -r '.images | map(select(.tags[] | contains ('<< parameters.dev-tag >>'))) | .[] .tags[0]' > dev_tags
+  - run:
+      name: delete dev tags
+      command: |
+        while read TAG
+            do curl -i -H 'Accept: application/json' \
+                       -H 'Content-Type: application/json' \
+                       -H 'Authorization: Bearer ${<< parameters.bearer-token >>}' \
+                       -X DELETE '<< parameters.api-url >>/<< parameters.image >>/tag/$TAG'
+        done < dev_tags

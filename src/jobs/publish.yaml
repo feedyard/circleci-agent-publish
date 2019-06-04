@@ -35,6 +35,11 @@ parameters:
     type: env_var_name
     default: DOCKER_PASSWORD
 
+  clean-tags:
+    description: steps to perform when cleaning up development tags
+    type: steps
+    default: []
+
   after-publish:
     description: Optional steps to run after publishing the docker image.
     type: steps
@@ -73,6 +78,9 @@ steps:
       name: Run after_publish lifecycle hook steps.
       condition: << parameters.after-publish >>
       steps: << parameters.after-publish >>
+  - when:
+      name: clean up development (dev.SHA1) tags
+      condition: << parameters.clean-tags >>
+      steps: << parameters.clean-tags >>
 
 
-# DELETE https://quay.io/api/v1/repository/{repository}/tag/{tag}

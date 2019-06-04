@@ -42,6 +42,10 @@ usage:
                   title: New Executor Version
                   message: 'a new version of the circleci-remote-docker image has been published'
                   webhook: SLACK_WEBHOOK
+            clean-tags:
+              - clean-quay:
+                  image: circleci-remote-docker
+                  bearer-token: $QUAYIO_BEARER_TOKEN
             filters:
               branches:
                 ignore: /.*/
