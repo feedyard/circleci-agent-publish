@@ -56,10 +56,19 @@ steps:
       image: << parameters.image >>
       tag: << parameters.pull-tag >>
       release: << parameters.release >>
+  - tag:
+      registry: << parameters.registry >>
+      image: << parameters.image >>
+      tag: << parameters.pull-tag >>
+      release: latest
   - push:
       registry: << parameters.registry >>
       image: << parameters.image >>
       tag: << parameters.release >>
+  - push:
+      registry: << parameters.registry >>
+      image: << parameters.image >>
+      tag: latest
   - when:
       name: Run after_publish lifecycle hook steps.
       condition: << parameters.after-publish >>
