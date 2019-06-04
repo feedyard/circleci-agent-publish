@@ -66,6 +66,9 @@ steps:
   - checkout
   - setup_remote_docker
   - lint
+  - run:
+      name: debug
+      command: echo << parameters.tag >>
   - when:
       name: Run after_checkout lifecycle hook steps.
       condition: << parameters.after-checkout >>
