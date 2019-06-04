@@ -66,4 +66,4 @@ steps:
       steps: << parameters.after-publish >>
 
 
-  #DELETE https://quay.io/api/v1/repository/{repository}/tag/{tag}
+# DELETE https://quay.io/api/v1/repository/{repository}/tag/{tag}
