@@ -52,7 +52,7 @@ steps:
   - run:
       name: delete dev tags
       command: |
-        while read TAG; do
+        while read TAG
             do curl -L -H 'Accept: application/json' \
                        -H 'Content-Type: application/json' \
                        -H 'Authorization: Bearer ${<< parameters.bearer-token >>}' \
