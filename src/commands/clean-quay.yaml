@@ -52,9 +52,9 @@ steps:
   - run:
       name: delete dev tags
       command: |
-        while read TAG
+        while read TAG; do
             do curl -L -H 'Accept: application/json' \
                        -H 'Content-Type: application/json' \
                        -H 'Authorization: Bearer ${<< parameters.bearer-token >>}' \
-                       -X DELETE '<< parameters.api-url >>/<< parameters.image >>/tag/$TAG'
+                       -X DELETE '<< parameters.api-url >>/<< parameters.image >>/tag/${TAG}'
         done < dev_tags
