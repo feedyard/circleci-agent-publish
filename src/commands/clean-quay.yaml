@@ -33,7 +33,7 @@ steps:
   - run:
       name: Confirm quay.io API bearer token environment variable is configured
       command: |
-        if ( -z "${<< parameters.bearer-token >>}" ); then
+        if [ ! ${<< parameters.bearer-token >>-} ]; then
           echo "quay.io API bearer token is not set, will not be able to access quay.io api."
           exit 1
         fi
