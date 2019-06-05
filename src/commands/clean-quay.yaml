@@ -48,7 +48,7 @@ steps:
   - run:
       name: find development tagged images
       command: |
-        cat all_images.json | jq -r '.images | map(select(.tags[] | contains ('<< parameters.dev-tag >>'))) | .[] .tags[0]' > dev_tags
+        cat all_images.json | jq -r '.images | map(select(.tags[] | contains ("<< parameters.dev-tag >>"))) | .[] .tags[0]' > dev_tags
   - run:
       name: delete dev tags
       command: |
