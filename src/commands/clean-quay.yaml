@@ -40,11 +40,11 @@ steps:
   - run:
       name: GET all repository tags
       command: |
-        curl -i -H 'Accept: application/json' \
-                -H 'Content-Type: application/json' \
-                -H 'Authorization: Bearer ${<< parameters.bearer-token >>}' \
-                -X GET '<< parameters.api-url >>/<< parameters.image >>/image' \
-                > all_images.json
+        curl -H 'Accept: application/json' \
+             -H 'Content-Type: application/json' \
+             -H 'Authorization: Bearer ${<< parameters.bearer-token >>}' \
+             -X GET '<< parameters.api-url >>/<< parameters.image >>/image' \
+             > all_images.json
   - run:
       name: find development tagged images
       command: |
@@ -53,8 +53,8 @@ steps:
       name: delete dev tags
       command: |
         while read TAG
-            do curl -i -H 'Accept: application/json' \
-                       -H 'Content-Type: application/json' \
-                       -H 'Authorization: Bearer ${<< parameters.bearer-token >>}' \
-                       -X DELETE '<< parameters.api-url >>/<< parameters.image >>/tag/$TAG'
+            do curl -H 'Accept: application/json' \
+                    -H 'Content-Type: application/json' \
+                    -H 'Authorization: Bearer ${<< parameters.bearer-token >>}' \
+                    -X DELETE '<< parameters.api-url >>/<< parameters.image >>/tag/$TAG'
         done < dev_tags
