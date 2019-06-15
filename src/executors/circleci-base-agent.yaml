@@ -16,4 +16,4 @@ parameters:
 resource_class: <<parameters.resource-class>>
 
 docker:
-  - image: quay.io/feedyard/circleci-base-agent
+  - image: quay.io/feedyard/circleci-base-agent:4.8.0
