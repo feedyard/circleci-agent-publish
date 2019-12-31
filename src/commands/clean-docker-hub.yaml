@@ -44,10 +44,10 @@ steps:
   - run:
       name: Get bearer token using username and password
       command: |
-        TOKEN=`curl -s -H "Content-Type: application/json" \
-              -X POST -d '{"username": "<< parameters.image >>", "password": "'$PASSWORD'"}' \
-              https://hub.docker.com/v2/users/login/ | jq -r .token`
-        echo ${TOKEN} > token.txt
+        curl -s -H "Content-Type: application/json" \
+             -X POST -d '{"username": "<< parameters.registry-login >>", "password": "<< parameters.registry-password >>"}' \
+              https://hub.docker.com/v2/users/login/ | jq -r .token > token.jwt
+        export TOKEN=$(cat token.jwt)
   - run:
       name: GET all repository tags
       command: |
