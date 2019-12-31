@@ -36,7 +36,7 @@ steps:
       name: GET all repository tags
       command: |
         export TOKEN=$(cat token.jwt)
-        curl "https://hub.docker.com/v2/repositories/${ORGANIZATION}/${IMAGE}/tags/" \
+        curl "https://hub.docker.com/v2/repositories/${<< parameters.image >>}/tags/" \
              -X GET \
              -H "Authorization: JWT ${TOKEN}" \
              > all_images.json
