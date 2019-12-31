@@ -43,7 +43,7 @@ steps:
   - run:
       name: find development tagged images
       command: |
-        cat all_images.json | jq -r '.results | .[] | select(.name | contains (".6."))' > dev_tags
+        cat all_images.json | jq -r '.results | .[] | select(.name | contains ("<< parameters.dev-tag >>"))' > dev_tags
   - run:
       name: delete dev tags
       command: |
