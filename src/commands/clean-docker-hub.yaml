@@ -45,7 +45,7 @@ steps:
       name: Get bearer token using username and password
       command: |
         curl -s -H "Content-Type: application/json" \
-             -X POST -d '{"username": "<< parameters.registry-login >>", "password": "<< parameters.registry-password >>"}' \
+             -X POST -d '{"username": "$(<< parameters.registry-login >>)", "password": "$(<< parameters.registry-password >>)"}' \
               https://hub.docker.com/v2/users/login/ | jq -r .token > token.jwt
         export TOKEN=$(cat token.jwt)
   - run:
