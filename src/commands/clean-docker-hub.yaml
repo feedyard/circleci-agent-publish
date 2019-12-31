@@ -42,13 +42,6 @@ parameters:
 
 steps:
   - run:
-      name: Confirm docker registry login and password variables are configured
-      command: |
-        if [ ! ${<< parameters.registry-login >>-} || ! ${<< parameters.registry-password >>-} ]; then
-          echo "docker hub credentials not provided, will not be able to access docker.io api."
-          exit 1
-        fi
-  - run:
       name: Get bearer token using username and password
       command: |
         TOKEN=`curl -s -H "Content-Type: application/json" \
