@@ -36,4 +36,6 @@ steps:
         fi
   - run:
       name: Confirm Docker registry login
-      command: echo ${<< parameters.registry-password >>} | docker login -u ${<< parameters.registry-login >>} --password-stdin << parameters.registry >>
+      command: |
+        echo 'write to .docker/config.json is secure in ephemeral runtime environment'
+        echo ${<< parameters.registry-password >>} | docker login -u ${<< parameters.registry-login >>} --password-stdin << parameters.registry >>
