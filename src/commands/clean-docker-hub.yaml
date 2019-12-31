@@ -1,0 +1,75 @@
+# src/commands/clean-docker-hub.yaml
+
+description: Steps to clean up development tags from docker.io registry
+
+parameters:
+
+  image:
+    description: Name of image
+    type: string
+
+  registry-login:
+    description: username for reigstry access
+    type: env_var_name
+    default: DOCKER_LOGIN
+
+  registry-password:
+    description: password for registry access
+    type: env_var_name
+    default: DOCKER_PASSWORD
+
+  dev-tag:
+    description: >
+      Value for tag* to clean up. quay.io will automatically remove images with no tag references
+      either directly or indirectly through a parent child relationship
+    type: string
+    default: dev
+
+  api-url:
+    description: quay.io api url
+    type: string
+    default: https://hub.docker.com/v2/repositories
+
+# TOKEN=`curl -s -H "Content-Type: application/json" -X POST -d '{"username": "'$USERNAME'", "password": "'$PASSWORD'"}' https://hub.docker.com/v2/users/login/ | jq -r .token`
+
+# #GET /v2/<name>/tags/list
+
+# curl "https://hub.docker.com/v2/repositories/${ORGANIZATION}/${IMAGE}/tags/" \
+# -X GET \
+# -H "Authorization: JWT ${TOKEN}"
+
+# cat output | jq -r '.results | .[] | select(.name | contains (".6."))'
+
+steps:
+  - run:
+      name: Confirm docker registry login and password variables are configured
+      command: |
+        if [ ! ${<< parameters.registry-login >>-} || ! ${<< parameters.registry-password >>-} ]; then
+          echo "docker hub credentials not provided, will not be able to access docker.io api."
+          exit 1
+        fi
+  - run:
+      name: Get bearer token using username and password
+      command: |
+        TOKEN=`curl -s -H "Content-Type: application/json" \
+              -X POST -d '{"username": "<< parameters.image >>", "password": "'$PASSWORD'"}' \
+              https://hub.docker.com/v2/users/login/ | jq -r .token`
+  - run:
+      name: GET all repository tags
+      command: |
+        curl "https://hub.docker.com/v2/repositories/${ORGANIZATION}/${IMAGE}/tags/" \
+             -X GET \
+             -H "Authorization: JWT ${TOKEN}" \
+             > all_images.json
+  - run:
+      name: find development tagged images
+      command: |
+        cat all_images.json | jq -r '.results | .[] | select(.name | contains (".6."))' > dev_tags
+  - run:
+      name: delete dev tags
+      command: |
+        while read TAG; do
+            curl "<< parameters.api-url >>/<< parameters.image >>/tags/${TAG}/" \
+                 -X DELETE \
+                 -H "Authorization: JWT ${TOKEN}"
+        done < dev_tags

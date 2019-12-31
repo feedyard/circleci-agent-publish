@@ -10,3 +10,7 @@ Workflows assume:
 See orb registry help and examples pages for use descriptions.
 
 *Incorporates concepts from circleci/docker-publish@0.1.2.
+
+## local development
+
+-requires
