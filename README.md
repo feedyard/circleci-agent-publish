@@ -4,7 +4,7 @@
 	</p>
   <h3>feedyard orbs</h3>
   <h1>orb-executor-tools</h1>
-  [![feedyard](https://circleci.com/gh/feedyard/orb-executor-tools.svg?style=shield) ![CircleCI Orb Version](https://img.shields.io/badge/endpoint.svg?url=https://badges.circleci.io/orb/feedyard/executor-tools)  ![Software License](https://img.shields.io/badge/license-MIT-blue.svg)  
+  <a href="https://app.circleci.com/pipelines/github/feedyard/orb-executor-tools"><img src="https://circleci.com/gh/feedyard/orb-executor-tools.svg?style=shield"></a> <a href="https://circleci.com/orbs/registry/orb/feedyard/executor-tools"><img src="https://img.shields.io/badge/endpoint.svg?url=https://badges.circleci.io/orb/feedyard/executor-tools"></a> <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/github/license/feedyard/orb-executor-tools"></a>
   <h5>an sdlc orb for circleci docker image executors </h5>
 </div>
 <br />
