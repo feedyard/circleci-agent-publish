@@ -1,25 +1,28 @@
 # src/examples/lifecycle-hooks.yaml
 
-description: A standard TBD circleci docker agent pipeline workflow, where git push triggers build and push.
+description: |
+  A standard TBD circleci docker agent pipeline workflow. Git push triggers dev-build, tag for release.
+  Uses lifecycle hooks to take specific actions before or after the image build, and uses the clean-tags
+  command to remove SHA tags from registry manifest.
 
 usage:
   version: 2.1
 
   orbs:
-    executor-tools: feedyard/executor-tools@1.0.0
+    executor-tools: feedyard/executor-tools@0.4.0
     common: feedyard/common-pipeline-tasks@0.4.0
 
   workflows:
     version: 2
 
-    circleci-remote-docker-image-pipeline:
+    my-circleci-executor-image-pipeline:
       jobs:
         - executor-tools/dev-release:
-            image: circleci-remote-docker
+            image: my-circleci-executor
             before-build:
               - common/slack:
                   title: Build notice
-                  message: 'a new build of the circleci-remote-docker image has started'
+                  message: 'a new build of the my-circleci-executor image has started'
                   webhook: SLACK_WEBHOOK
             after-build:
               - run:
@@ -27,8 +30,8 @@ usage:
                   command: |
                     set -euo pipefail
                     inspec exec --no-distinct-exit profiles/cis-docker
-                    CID="$(docker run -it -d --entrypoint ash quay.io/feedyard/circleci-remote-docker:$CIRCLE_SHA1)"
-                    inspec exec profiles/circleci-remote-docker/ -t docker://$CID
+                    CID="$(docker run -it -d --entrypoint ash quay.io/feedyard/my-circleci-executor:$CIRCLE_SHA1)"
+                    inspec exec profiles/my-circleci-executor/ -t docker://$CID
                     docker rm -f $CID
             filters:
               branches:
@@ -36,15 +39,15 @@ usage:
               tags:
                 ignore: /.*/
         - executor-tools/publish:
-            image: circleci-remote-docker
+            image: my-circleci-executor
             after-publish:
               - common/slack:
                   title: New Executor Version
-                  message: 'a new version of the circleci-remote-docker image has been published'
+                  message: 'a new version of the cmy-circleci-executor image has been published'
                   webhook: SLACK_WEBHOOK
             clean-tags:
               - clean-quay:
-                  image: circleci-remote-docker
+                  image: my-circleci-executor
                   bearer-token: $QUAYIO_BEARER_TOKEN
             filters:
               branches:

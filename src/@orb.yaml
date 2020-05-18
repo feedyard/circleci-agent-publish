@@ -3,5 +3,4 @@ version: 2.1
 
 description: |
   Standard jobs for building and publishing custom circleci docker executor images. Assumes DOCKER_LOGIN and
-  DOCKER_PASSWORD Environment variables are defined. See https://github.com/feedyard/circleci-remote-docker for an
-  example test configuration. Incorporates concepts from circleci/docker-publish@0.1.2.
+  DOCKER_PASSWORD Environment variables are defined. Incorporates concepts from circleci/docker-publish@0.1.2.

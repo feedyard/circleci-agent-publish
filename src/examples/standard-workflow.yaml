@@ -1,27 +1,30 @@
 # src/examples/standard-workflow.yaml
 
-description: A standard TBD circleci docker agent pipeline workflow, where git push triggers build and push.
+description: |
+  A standard TBD circleci docker agent pipeline workflow. Git push triggers dev-build, tag for release.
+  Uses docker.io by default and assumes access credentials are set with ENV variables.
+
 
 usage:
   version: 2.1
 
   orbs:
-    executor-tools: feedyard/executor-tools@1.0.0
+    executor-tools: feedyard/executor-tools@0.4.0
 
   workflows:
     version: 2
 
-    circleci-remote-docker-image-pipeline:
+    my-circleci-executor-image-pipeline:
       jobs:
         - executor-tools/dev-release:
-            image: circleci-remote-docker
+            image: my-circleci-executor
             filters:
               branches:
                 only: master
               tags:
                 ignore: /.*/
         - executor-tools/publish:
-            image: circleci-remote-docker
+            image: my-circleci-executor
             filters:
               branches:
                 ignore: /.*/
