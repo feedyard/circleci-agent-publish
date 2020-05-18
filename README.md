@@ -16,7 +16,7 @@ Example private registry workflow: (see [orb registry](https://circleci.com/orbs
 version: 2.1
 
 orbs:
-  executor-tools: feedyard/executor-tools@0.4.0
+  executor-tools: feedyard/executor-tools@0.4.1
   snyk: snyk/snyk@0.0.10
 
 on-push-master: &on-push-master
