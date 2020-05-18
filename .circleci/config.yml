@@ -2,7 +2,7 @@
 version: 2.1
 
 orbs:
-  orb-tools: feedyard/orb-tools@2.1.5
+  orb-tools: feedyard/orb-tools@2.3.0
 
 # yaml anchor filters
 dev-release-filter: &dev-release-filter
@@ -33,14 +33,8 @@ major-tag-publish-filter: &major-tag-publish-filter
 workflows:
   dev-release-executor-tools:
     jobs:
-      - orb-tools/lint:
-          use-default-rules: true
-          filters: *dev-release-filter
-
       - orb-tools/validate:
           filters: *dev-release-filter
-          requires:
-            - orb-tools/lint
 
       - orb-tools/publish-dev:
           context: orb-publishing
