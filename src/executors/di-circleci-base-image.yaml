@@ -1,4 +1,4 @@
-# src/executors/circleci-base-agent.yaml
+# src/executors/di-circleci-base-image.yaml
 
 description: >
   orb-executor-tools uses the di-circleci-base-image convenience image, an Alpine Linux-based circleci
