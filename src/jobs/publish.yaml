@@ -2,7 +2,7 @@
 
 description: Tag prior successful build as a release version
 
-executor: circleci-base-agent
+executor: di-circleci-base-image
 
 parameters:
 

@@ -2,7 +2,7 @@
 
 description: Check, build, and optionally deploy a Docker image.
 
-executor: circleci-base-agent
+executor: di-circleci-base-image
 
 parameters:
 

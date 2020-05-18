@@ -33,7 +33,7 @@ usage:
             registry-login: QUAY_ROBOT_USERNAME
             registry-password: QUAY_ROBOT_TOKEN
             image: myorg/my-circleci-executor
-            after_build:
+            after-build:
               - snyk/scan:
                   docker-image-name: myorg/my-circleci-executor:$CIRCLE_SHA1
                   organization: myorg
