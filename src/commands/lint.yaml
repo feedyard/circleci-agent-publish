@@ -12,4 +12,4 @@ parameters:
 steps:
   - run:
       name: hadolint Dockerfile
-      command: hadolint << parameters.dockerfile >>
+      command: docker run --rm -i hadolint/hadolint < << parameters.dockerfile >>
