@@ -82,16 +82,6 @@ steps:
   - setup_remote_docker
   - lint
   - when:
-      name: Perform snyk cve scan
-      condition: << parameters.docker-cve-scan >>
-      steps:
-        - cve-scan:
-            registry: << parameters.registry >>
-            image: << parameters.image >>
-            tag: << parameters.tag >>
-            snyk-organization: << parameters.snyk-organization >>
-            snyk-token: << parameters.snyk-token >>
-  - when:
       name: Run after_checkout lifecycle hook steps.
       condition: << parameters.after-checkout >>
       steps: << parameters.after-checkout >>
@@ -110,6 +100,16 @@ steps:
       tag: << parameters.tag >>
       registry: << parameters.registry >>
       extra-build-args: << parameters.extra-build-args >>
+  - when:
+      name: Perform snyk cve scan
+      condition: << parameters.docker-cve-scan >>
+      steps:
+        - cve-scan:
+            registry: << parameters.registry >>
+            image: << parameters.image >>
+            tag: << parameters.tag >>
+            snyk-organization: << parameters.snyk-organization >>
+            snyk-token: << parameters.snyk-token >>
   - when:
       name: Run after_build lifecycle hook steps.
       condition: << parameters.after-build >>
