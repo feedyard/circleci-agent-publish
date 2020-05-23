@@ -103,6 +103,8 @@ steps:
   - when:
       name: Perform snyk cve scan
       condition: << parameters.docker-cve-scan >>
+      requires:
+        - build
       steps:
         - cve-scan:
             registry: << parameters.registry >>
