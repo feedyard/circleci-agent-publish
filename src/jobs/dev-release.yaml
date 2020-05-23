@@ -107,7 +107,6 @@ steps:
         - build
       steps:
         - cve-scan:
-            registry: << parameters.registry >>
             image: << parameters.image >>
             tag: << parameters.tag >>
             snyk-organization: << parameters.snyk-organization >>
