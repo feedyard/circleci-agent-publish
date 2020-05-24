@@ -40,6 +40,21 @@ parameters:
     type: env_var_name
     default: DOCKER_PASSWORD
 
+  docker-cve-scan:
+    description: perform snyk.io docker cve scan
+    type: boolean
+    default: false
+
+  snyk-organization:
+    description: Scan results related to repository associated with organization created at snyk.io
+    type: string
+    default: ""
+
+  snyk-token:
+    description: snyk.io api-token
+    type: env_var_name
+    default: SNYK_TOKEN
+    
   extra-build-args:
     description: >
       Extra flags to pass to docker build. For examples, see
