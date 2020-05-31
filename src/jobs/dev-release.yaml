@@ -61,6 +61,26 @@ parameters:
     type: boolean
     default: false
 
+  bats-test:
+    description: Run container configuration check bats test
+    type: boolean
+    default: false
+
+  container-name:
+    description: name for running container
+    type: string
+    default: container-test
+
+  entry-point:
+    description: name of shell ( bash | ash | etc)
+    type: string
+    default: /bin/bash
+
+  test-path:
+    description: Name of folder with bats tests
+    type: string
+    default: test
+
   extra-build-args:
     description: >
       Extra flags to pass to docker build. For examples, see
@@ -123,6 +143,19 @@ steps:
             tag: << parameters.tag >>
             snyk-organization: << parameters.snyk-organization >>
             snyk-token: << parameters.snyk-token >>
+  - when:
+      name: perform bats container configuration test
+      condition: << parameters.bats-test >>
+      requires:
+        - build
+      steps:
+        - bats:
+            registry: << parameters.registry >>
+            image: << parameters.image >>
+            tag: << parameters.tag >>
+            container-name: << parameters.container-name >>
+            entry-point: << parameters.entry-point >>
+            test-path: << parameters.test-path >>
   - when:
       name: Run after_build lifecycle hook steps.
       condition: << parameters.after-build >>
