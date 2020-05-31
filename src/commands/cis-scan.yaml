@@ -1,0 +1,55 @@
+# src/commands/cis-scan.yaml
+
+description: conftest for CIS Docker Benchmarks section 4
+
+parameters:
+
+  cis-policy-config:
+    description: .opacisrc level 1 template
+    type: string
+    default: |
+      cispolicyconfig:
+        level_2_benchmark: false
+        run_as_user_required: true
+        approved_base_image_not_required: true
+        approved_base_images:
+          -
+        images_not_treated_as_immutable: false
+        only_necessary_packages_allowed: true
+        healthcheck_required: false
+        dockerfile_scanned_for_secrets: true
+        packages_verified: true
+      setuid:
+        setuid_or_setgid_values_allow_escalation: false
+        docker_content_trust: false
+
+steps:
+  - run:
+      name: pull policy
+      command: |
+        docker run --rm -v $(pwd):/project instrumenta/conftest pull https://raw.githubusercontent.com/ncheneweth/opa-dockerfile-benchmarks/master/policy/cis-docker-benchmark.rego
+  - run:
+      name: set cis level 1 default if .opacisrc is not present 
+      command: |
+        if [[ ! -f ".opacisrc" ]]; then
+          cat \<<EOF > .opacisrc
+        cispolicyconfig:
+          level_2_benchmark: false
+          run_as_user_required: true
+          approved_base_image_not_required: true
+          approved_base_images:
+            -
+          images_not_treated_as_immutable: false
+          only_necessary_packages_allowed: true
+          healthcheck_required: false
+          dockerfile_scanned_for_secrets: true
+          packages_verified: true
+        setuid:
+          setuid_or_setgid_values_allow_escalation: false
+          docker_content_trust: false
+        EOF
+        fi
+  - run:
+      name: evaluate Dockerfile
+      command: |
+        docker run --rm -v $(pwd):/project instrumenta/conftest test Dockerfile --data .opacisrc
