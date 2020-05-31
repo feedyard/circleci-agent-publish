@@ -1,0 +1,32 @@
+# src/examples/standard-workflow.yaml
+
+description: |
+  A simple TBD circleci docker agent pipeline workflow. Git push triggers dev-build, tag for release.
+  Uses docker.io by default and assumes access credentials are set with ENV variables.
+
+
+usage:
+  version: 2.1
+
+  orbs:
+    executor-tools: feedyard/executor-tools@0.4.0
+
+  workflows:
+    version: 2
+
+    my-circleci-executor-image-pipeline:
+      jobs:
+        - executor-tools/dev-release:
+            image: my-circleci-executor
+            filters:
+              branches:
+                only: master
+              tags:
+                ignore: /.*/
+        - executor-tools/publish:
+            image: my-circleci-executor
+            filters:
+              branches:
+                ignore: /.*/
+              tags:
+                only: /.*/

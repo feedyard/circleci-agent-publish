@@ -1,32 +1,43 @@
-# src/examples/standard-workflow.yaml
+---
+version: 2.1
 
-description: |
-  A standard TBD circleci docker agent pipeline workflow. Git push triggers dev-build, tag for release.
-  Uses docker.io by default and assumes access credentials are set with ENV variables.
+orbs:
+  executor-tools: feedyard/executor-tools@dev:1.0.0
 
+on-push-master: &on-push-master
+  branches:
+    only: /master/
+  tags:
+    ignore: /.*/
 
-usage:
-  version: 2.1
+on-tag-master: &on-tag-master
+  branches:
+    ignore: /.*/
+  tags:
+    only: /.*/
 
-  orbs:
-    executor-tools: feedyard/executor-tools@0.4.0
-
-  workflows:
-    version: 2
-
-    my-circleci-executor-image-pipeline:
-      jobs:
-        - executor-tools/dev-release:
-            image: my-circleci-executor
-            filters:
-              branches:
-                only: master
-              tags:
-                ignore: /.*/
-        - executor-tools/publish:
-            image: my-circleci-executor
-            filters:
-              branches:
-                ignore: /.*/
-              tags:
-                only: /.*/
+workflows:
+  version: 2
+  di-circleci-base-image-pipeline:
+    jobs:
+      - executor-tools/dev-release:
+          name: "dev-build"
+          context: team-context
+          image: org/base-image
+          tag: edge
+          docker-cve-scan: true
+          snyk-organization: org
+          cis-docker-image-scan: true
+          bats-test: true
+          container-name: base-image-test
+          filters: *on-push-master
+          
+      - executor-tools/publish:
+          name: Release
+          context: team-context
+          image: org/base-image
+          release: stable
+          clean-tags:
+            - executor-tools/clean-docker-hub:
+                image: org/base-image
+          filters: *on-tag-master      
