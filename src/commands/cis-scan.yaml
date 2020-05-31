@@ -52,4 +52,6 @@ steps:
   - run:
       name: evaluate Dockerfile
       command: |
+        pwd
+        ls -la
         docker run --rm -v $(pwd):/project instrumenta/conftest test Dockerfile --data .opacisrc
