@@ -27,7 +27,7 @@ steps:
   - run:
       name: pull policy
       command: |
-        docker run --rm -v $(pwd):/project instrumenta/conftest pull https://raw.githubusercontent.com/ncheneweth/opa-dockerfile-benchmarks/master/policy/cis-docker-benchmark.rego
+        conftest pull https://raw.githubusercontent.com/ncheneweth/opa-dockerfile-benchmarks/master/policy/cis-docker-benchmark.rego
   - run:
       name: set cis level 1 default if .opacisrc is not present 
       command: |
@@ -52,6 +52,4 @@ steps:
   - run:
       name: evaluate Dockerfile
       command: |
-        pwd
-        ls -la
-        docker run --rm -v $(pwd):/project instrumenta/conftest test Dockerfile --data .opacisrc
+        conftest test Dockerfile --data .opacisrc
