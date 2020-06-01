@@ -3,8 +3,14 @@
 description: Tag prior successful build as a release version
 
 executor: di-circleci-base-image
+shell: << parameters.shell >>
 
 parameters:
+
+  shell:
+    description: test
+    type: string
+    default: /bin/sh -eo pipefail
 
   registry:
     description: Name of registry

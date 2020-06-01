@@ -10,7 +10,7 @@ parameters:
   shell:
     description: test
     type: string
-    default: /bin/bash
+    default: /bin/sh -eo pipefail
 
   dockerfile:
     description: Name of dockerfile
