@@ -3,8 +3,14 @@
 description: Check, build, and optionally deploy a Docker image.
 
 executor: di-circleci-base-image
+shell: << parameters.shell >>
 
 parameters:
+
+  shell:
+    description: test
+    type: string
+    default: /bin/bash
 
   dockerfile:
     description: Name of dockerfile
