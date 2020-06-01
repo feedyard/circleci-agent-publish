@@ -1,43 +1,48 @@
----
-version: 2.1
+# src/examples/standard-workflow.yaml
 
-orbs:
-  executor-tools: feedyard/executor-tools@dev:1.0.0
+description: |
+  A standard workflow. Git push triggers dev-build, tag for release.
+  Uses docker.io by default and assumes access credentials are set with ENV variables.
+  Includes snyk cve scan, use of conftest (open policy agent) for cis docker image benchmarks
+  and bats configuration test of resulting image.
 
-on-push-master: &on-push-master
-  branches:
-    only: /master/
-  tags:
-    ignore: /.*/
+usage:
+  version: 2.1
 
-on-tag-master: &on-tag-master
-  branches:
-    ignore: /.*/
-  tags:
-    only: /.*/
+  orbs:
+    executor-tools: feedyard/executor-tools@dev:1.0.0
 
-workflows:
-  version: 2
-  di-circleci-base-image-pipeline:
-    jobs:
-      - executor-tools/dev-release:
-          name: "dev-build"
-          context: team-context
-          image: org/base-image
-          tag: edge
-          docker-cve-scan: true
-          snyk-organization: org
-          cis-docker-image-scan: true
-          bats-test: true
-          container-name: base-image-test
-          filters: *on-push-master
-          
-      - executor-tools/publish:
-          name: Release
-          context: team-context
-          image: org/base-image
-          release: stable
-          clean-tags:
-            - executor-tools/clean-docker-hub:
-                image: org/base-image
-          filters: *on-tag-master      
+  on-push-master: &on-push-master
+    branches:
+      only: /master/
+    tags:
+      ignore: /.*/
+
+  on-tag-master: &on-tag-master
+    branches:
+      ignore: /.*/
+    tags:
+      only: /.*/
+
+  workflows:
+    version: 2
+    di-circleci-base-image-pipeline:
+      jobs:
+        - executor-tools/dev-release:
+            name: "dev-build"
+            context: team-context
+            image: org/base-image
+            tag: edge
+            docker-cve-scan: true
+            snyk-organization: org
+            cis-docker-image-scan: true
+            bats-test: true
+            container-name: base-image-test
+            filters: *on-push-master
+            
+        - executor-tools/publish:
+            name: Release
+            context: team-context
+            image: org/base-image
+            release: stable
+            filters: *on-tag-master      
