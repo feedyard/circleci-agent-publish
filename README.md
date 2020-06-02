@@ -16,7 +16,7 @@ Example workflow: (see [orb registry](https://circleci.com/orbs/registry/orb/fee
 version: 2.1
 
 orbs:
-  executor-tools: feedyard/executor-tools@dev:1.1.0
+  executor-tools: feedyard/executor-tools@dev:2.0.0
 
 on-push-master: &on-push-master
   branches:
