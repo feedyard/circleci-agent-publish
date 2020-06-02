@@ -21,20 +21,15 @@ parameters:
     description: Name of image
     type: string
 
-  tag:
-    description: Value for latest image release
-    type: string
-    default: latest
-
   pull-tag:
     description: Value for tag to pull and make publish release
     type: string
     default: dev.$CIRCLE_SHA1
 
-  release:
-    description: Value for release tag. Override to substitute for git tag-based semantic release version, e.g., stable
+  release-tag:
+    description: Value for an additional release tag.
     type: string
-    default: ""
+    default: latest
 
   registry-login:
     description: username for reigstry access
@@ -71,37 +66,20 @@ steps:
       registry: << parameters.registry >>
       image: << parameters.image >>
       tag: << parameters.pull-tag >>
-      release: << parameters.tag >>
+      release: $CIRCLE_TAG
   - tag:
       registry: << parameters.registry >>
       image: << parameters.image >>
       tag: << parameters.pull-tag >>
-      release: $CIRCLE_TAG
+      release: << parameters.release-tag >>
   - push:
       registry: << parameters.registry >>
       image: << parameters.image >>
-      tag: << parameters.tag >>
-  - unless:
-      name: push git tag release version
-      condition: << parameters.release >>
-      steps:
-        - push:
-            registry: << parameters.registry >>
-            image: << parameters.image >>
-            tag: $CIRCLE_TAG
-  - when:
-      name: publish a uniquely named release version
-      condition: << parameters.release >>
-      steps:
-        - tag:
-            registry: << parameters.registry >>
-            image: << parameters.image >>
-            tag: << parameters.pull-tag >>
-            release: << parameters.release >>
-        - push:
-            registry: << parameters.registry >>
-            image: << parameters.image >>
-            tag: << parameters.release >>
+      tag: $CIRCLE_TAG
+  - push:
+      registry: << parameters.registry >>
+      image: << parameters.image >>
+      tag: << parameters.release-tag >>
   - when:
       name: Run after_publish lifecycle hook steps.
       condition: << parameters.after-publish >>

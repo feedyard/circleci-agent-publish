@@ -46,5 +46,5 @@ usage:
             name: Release
             context: team-context
             image: org/base-image
-            release: stable
+            release-tag: stable
             filters: *on-tag-master      
