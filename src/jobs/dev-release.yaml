@@ -8,7 +8,7 @@ shell: << parameters.shell >>
 parameters:
 
   shell:
-    description: test
+    description: default shell invocation. Override to support different shells or tools like secrethub.io
     type: string
     default: /bin/sh -eo pipefail
 
@@ -27,7 +27,7 @@ parameters:
     type: string
 
   tag:
-    description: Value for tag
+    description: Value for dev build tag
     type: string
     default: dev.$CIRCLE_SHA1
 

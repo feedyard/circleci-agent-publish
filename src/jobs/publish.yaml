@@ -8,7 +8,7 @@ shell: << parameters.shell >>
 parameters:
 
   shell:
-    description: test
+    description: default shell invocation. Override to support different shells or tools like secrethub.io
     type: string
     default: /bin/sh -eo pipefail
 
@@ -21,15 +21,20 @@ parameters:
     description: Name of image
     type: string
 
+  tag:
+    description: Value for latest image release
+    type: string
+    default: latest
+
   pull-tag:
-    description: Value for tag
+    description: Value for tag to pull and make publish release
     type: string
     default: dev.$CIRCLE_SHA1
 
   release:
-    description: Value for tag
+    description: Value for release tag. Override to substitute for git tag-based semantic release version, e.g., stable
     type: string
-    default: $CIRCLE_TAG
+    default: ""
 
   registry-login:
     description: username for reigstry access
@@ -66,20 +71,37 @@ steps:
       registry: << parameters.registry >>
       image: << parameters.image >>
       tag: << parameters.pull-tag >>
-      release: << parameters.release >>
+      release: << parameters.tag >>
   - tag:
       registry: << parameters.registry >>
       image: << parameters.image >>
       tag: << parameters.pull-tag >>
-      release: latest
+      release: $CIRCLE_TAG
   - push:
       registry: << parameters.registry >>
       image: << parameters.image >>
-      tag: << parameters.release >>
-  - push:
-      registry: << parameters.registry >>
-      image: << parameters.image >>
-      tag: latest
+      tag: << parameters.tag >>
+  - unless:
+      name: push git tag release version
+      condition: << parameters.release >>
+      steps:
+        - push:
+            registry: << parameters.registry >>
+            image: << parameters.image >>
+            tag: $CIRCLE_TAG
+  - when:
+      name: publish a uniquely named release version
+      condition: << parameters.release >>
+      steps:
+        - tag:
+            registry: << parameters.registry >>
+            image: << parameters.image >>
+            tag: << parameters.pull-tag >>
+            release: << parameters.release >>
+        - push:
+            registry: << parameters.registry >>
+            image: << parameters.image >>
+            tag: << parameters.release >>
   - when:
       name: Run after_publish lifecycle hook steps.
       condition: << parameters.after-publish >>
