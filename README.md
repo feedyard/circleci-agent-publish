@@ -9,15 +9,14 @@
 </div>
 <br />
 
-Example private registry workflow: (see [orb registry](https://circleci.com/orbs/registry/orb/feedyard/executor-tools) for detailed examples)
+Example workflow: (see [orb registry](https://circleci.com/orbs/registry/orb/feedyard/executor-tools) for detailed examples)
 
 ```yaml
 ---
 version: 2.1
 
 orbs:
-  executor-tools: feedyard/executor-tools@0.4.1
-  snyk: snyk/snyk@0.0.10
+  executor-tools: feedyard/executor-tools@dev:1.1.0
 
 on-push-master: &on-push-master
   branches:
@@ -33,27 +32,29 @@ on-tag-master: &on-tag-master
 
 workflows:
   version: 2
-
-  my-circleci-executor-image-pipeline:
+  di-circleci-base-image-pipeline:
     jobs:
       - executor-tools/dev-release:
-          registry: quay.io
-          registry-login: QUAY_ROBOT_USERNAME
-          registry-password: QUAY_ROBOT_TOKEN
-          image: myorg/my-circleci-executor
-          after_build:
-            - snyk/scan:
-                docker-image-name: myorg/my-circleci-executor:$CIRCLE_SHA1
-                organization: myorg
-                fail-on-issues: true
-                monitor-on-build: false
+          shell: secrethub run -- /bin/sh -eo pipefail
+          name: "dev-build"
+          context: team-context
+          image: org/base-image
+          tag: edge
+          docker-cve-scan: true
+          snyk-organization: org
+          cis-docker-image-scan: true
+          bats-test: true
+          container-name: base-image-test
           filters: *on-push-master
+          
       - executor-tools/publish:
-          registry: quay.io
-          registry-login: QUAY_ROBOT_USERNAME
-          registry-password: QUAY_ROBOT_TOKEN
-          image: myorg/my-circleci-executor
-          filters: *on-tag-master
+          shell: secrethub run -- /bin/sh -eo pipefail
+          name: Release
+          context: team-context
+          image: org/base-image
+          release: stable
+          filters: *on-tag-master      
+
 ```
 
 Workflows assume:

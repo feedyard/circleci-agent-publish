@@ -2,7 +2,7 @@
 
 description: |
   A standard workflow. Git push triggers dev-build, tag for release.
-  Uses docker.io by default and assumes access credentials are set with ENV variables.
+  Uses docker.io by default and uses secrethub to set access credentials in ENV variables.
   Includes snyk cve scan, use of conftest (open policy agent) for cis docker image benchmarks
   and bats configuration test of resulting image.
 
@@ -10,7 +10,7 @@ usage:
   version: 2.1
 
   orbs:
-    executor-tools: feedyard/executor-tools@dev:1.0.0
+    executor-tools: feedyard/executor-tools@dev:1.1.0
 
   on-push-master: &on-push-master
     branches:
@@ -29,6 +29,7 @@ usage:
     di-circleci-base-image-pipeline:
       jobs:
         - executor-tools/dev-release:
+            shell: secrethub run -- /bin/sh -eo pipefail
             name: "dev-build"
             context: team-context
             image: org/base-image
@@ -41,6 +42,7 @@ usage:
             filters: *on-push-master
             
         - executor-tools/publish:
+            shell: secrethub run -- /bin/sh -eo pipefail
             name: Release
             context: team-context
             image: org/base-image
