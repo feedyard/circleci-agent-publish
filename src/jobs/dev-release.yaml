@@ -113,6 +113,7 @@ steps:
   - checkout
   - setup_remote_docker
   - lint
+  
   - when:
       name: Run after_checkout lifecycle hook steps.
       condition: << parameters.after-checkout >>
@@ -166,6 +167,7 @@ steps:
       name: Run after_build lifecycle hook steps.
       condition: << parameters.after-build >>
       steps: << parameters.after-build >>
+      
   - push:
       registry: << parameters.registry >>
       image: << parameters.image >>
