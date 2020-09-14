@@ -52,4 +52,4 @@ steps:
   - run:
       name: evaluate Dockerfile
       command: |
-        conftest test Dockerfile --data .opacisrc
+        conftest test Dockerfile --policy . --data .opacisrc
