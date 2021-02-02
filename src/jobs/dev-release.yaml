@@ -46,6 +46,21 @@ parameters:
     type: env_var_name
     default: DOCKER_PASSWORD
 
+  assume-aws-role:
+    description: write AWS config files from environment variables
+    type: boolean
+    default: false
+
+  aws-default-region:
+    description: Default AWS region used in .aws/credentials after assume role
+    type: string
+    default: ""
+
+  aws-image-repository:
+    description: AWS ecr image repository and name
+    type: string
+    default: ""
+
   docker-cve-scan:
     description: perform snyk.io docker cve scan
     type: boolean
@@ -122,6 +137,9 @@ steps:
       registry: << parameters.registry >>
       registry-login: << parameters.registry-login >>
       registry-password: << parameters.registry-password >>
+      assume-aws-role: << parameters.assume-aws-role >>
+      aws-default-region: << parameters.aws-default-region >>
+      aws-image-repository: << parameters.registry >><< parameters.image >>
   - when:
       name: Run before_build lifecycle hook steps.
       condition: << parameters.before-build >>
