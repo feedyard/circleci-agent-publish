@@ -76,6 +76,11 @@ parameters:
     type: env_var_name
     default: SNYK_TOKEN
   
+  skip-base-image:
+    description: optionally, skip performing cve scan of base image
+    type: boolean
+    default: false
+  
   # uses example policy from https://github.com/ncheneweth/opa-dockerfile-benchmarks
   cis-docker-image-scan:
     description: perform CIS Docker Benchmark section 4 scan
@@ -168,6 +173,7 @@ steps:
             tag: << parameters.tag >>
             snyk-organization: << parameters.snyk-organization >>
             snyk-token: << parameters.snyk-token >>
+            skip-base-image: << parameters.skip-base-image >>
   - when:
       name: perform bats container configuration test
       condition: << parameters.bats-test >>
