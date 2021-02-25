@@ -31,8 +31,9 @@ steps:
   - run:
       name: set cis level 1 default if .opacisrc is not present 
       command: |
-        if [[ ! -f ".opacisrc" ]]; then
-          cat \<<EOF > .opacisrc
+        if [[ ! -f ".conftest/cis-benchmark-policy.yaml" ]]; then
+          mkdir -p .conftest
+          cat \<<EOF > .conftest/cis-benchmark-policy.yaml
         cispolicyconfig:
           level_2_benchmark: false
           run_as_user_required: true
@@ -52,4 +53,4 @@ steps:
   - run:
       name: evaluate Dockerfile
       command: |
-        conftest test Dockerfile --policy . --data .opacisrc
+        conftest test Dockerfile --policy . --data .conftest
