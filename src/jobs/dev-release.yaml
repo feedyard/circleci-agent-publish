@@ -29,7 +29,7 @@ parameters:
   tag:
     description: Value for dev build tag
     type: string
-    default: dev.$CIRCLE_SHA1
+    default: dev.${CIRCLE_SHA1:0:7}
 
   registry:
     description: Name of registry
@@ -46,28 +46,8 @@ parameters:
     type: env_var_name
     default: DOCKER_PASSWORD
 
-  assume-aws-role:
-    description: write AWS config files from environment variables
-    type: boolean
-    default: false
-
-  aws-default-region:
-    description: Default AWS region used in .aws/credentials after assume role
-    type: string
-    default: ""
-
-  aws-image-repository:
-    description: AWS ecr image repository and name
-    type: string
-    default: ""
-
-  docker-cve-scan:
-    description: perform snyk.io docker cve scan
-    type: boolean
-    default: false
-
   snyk-organization:
-    description: Scan results related to repository associated with organization created at snyk.io
+    description: Trigger Scan results related to repository associated with organization created at snyk.io
     type: string
     default: ""
 
@@ -75,12 +55,12 @@ parameters:
     description: snyk.io api-token
     type: env_var_name
     default: SNYK_TOKEN
-  
+
   skip-base-image:
     description: optionally, skip performing cve scan of base image
     type: boolean
     default: false
-  
+
   # uses example policy from https://github.com/ncheneweth/opa-dockerfile-benchmarks
   cis-docker-image-scan:
     description: perform CIS Docker Benchmark section 4 scan
@@ -89,6 +69,11 @@ parameters:
 
   bats-test:
     description: Run container configuration check bats test
+    type: boolean
+    default: false
+
+  inspec-test:
+    description: Run container configuration check inspec test
     type: boolean
     default: false
 
@@ -103,7 +88,7 @@ parameters:
     default: /bin/bash
 
   test-path:
-    description: Name of folder with bats tests
+    description: Name of folder with tests
     type: string
     default: test
 
@@ -133,7 +118,6 @@ steps:
   - checkout
   - setup_remote_docker
   - lint
-  
   - when:
       name: Run after_checkout lifecycle hook steps.
       condition: << parameters.after-checkout >>
@@ -142,9 +126,6 @@ steps:
       registry: << parameters.registry >>
       registry-login: << parameters.registry-login >>
       registry-password: << parameters.registry-password >>
-      assume-aws-role: << parameters.assume-aws-role >>
-      aws-default-region: << parameters.aws-default-region >>
-      aws-image-repository: << parameters.registry >><< parameters.image >>
   - when:
       name: Run before_build lifecycle hook steps.
       condition: << parameters.before-build >>
@@ -163,7 +144,7 @@ steps:
         - cis-scan
   - when:
       name: Perform snyk cve scan
-      condition: << parameters.docker-cve-scan >>
+      condition: << parameters.snyk-organization >>
       requires:
         - build
       steps:
@@ -188,10 +169,22 @@ steps:
             entry-point: << parameters.entry-point >>
             test-path: << parameters.test-path >>
   - when:
+      name: perform inspec container configuration test
+      condition: << parameters.inspec-test >>
+      requires:
+        - build
+      steps:
+        - bats:
+            registry: << parameters.registry >>
+            image: << parameters.image >>
+            tag: << parameters.tag >>
+            container-name: << parameters.container-name >>
+            entry-point: << parameters.entry-point >>
+            test-path: << parameters.test-path >>
+  - when:
       name: Run after_build lifecycle hook steps.
       condition: << parameters.after-build >>
       steps: << parameters.after-build >>
-      
   - push:
       registry: << parameters.registry >>
       image: << parameters.image >>

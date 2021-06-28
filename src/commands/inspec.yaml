@@ -1,9 +1,9 @@
 # src/commands/bats.yaml
 
 description: |
-  A common method of testing docker image configuration for infrastructure-as-code oriented containers.
-  This test will first run the docker image and then execute the bats test.
-  (see https://github.com/bats-core/bats-core)
+  perform InSpec based configuration tests.
+  This command will first run the docker image and then execute the inspec test.
+  (see https://community.chef.io/tools/chef-inspec)
 
 parameters:
 
@@ -32,14 +32,14 @@ parameters:
     default: /bin/bash
 
   test-path:
-    description: Name of folder with bats tests
+    description: Name of folder with inspec tests
     type: string
     default: test
 
 steps:
   - run:
       name: run image to be tested
-      command: docker run -it -d --name << parameters.container-name >> --entrypoint << parameters.entry-point >> << parameters.registry >>/<< parameters.image>>:<< parameters.tag >>
+      command: CID="$(docker run -it -d --name << parameters.container-name >> --entrypoint << parameters.entry-point >> << parameters.registry >>/<< parameters.image >>:<< parameters.tag >>)"
   - run:
       name: run bats test
-      command: bats << parameters.test-path >>
+      command: inspec exec << parameters.test-path >> -t docker://$CID

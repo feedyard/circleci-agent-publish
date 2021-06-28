@@ -4,3 +4,6 @@ version: 2.1
 description: |
   Standard jobs for building and publishing custom circleci docker executor images. Assumes DOCKER_LOGIN and
   DOCKER_PASSWORD Environment variables are defined. Incorporates concepts from circleci/docker-publish@0.1.2.
+
+display:
+  source_url: "https://github.com/feedyard/orb-executor-tools"

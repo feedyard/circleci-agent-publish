@@ -21,7 +21,7 @@ parameters:
   tag:
     description: Value for tag
     type: string
-    default: dev.$CIRCLE_SHA1
+    default: dev.${CIRCLE_SHA1:0:7}
 
   registry:
     description: Name of registry

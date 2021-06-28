@@ -34,17 +34,16 @@ usage:
             context: team-context
             image: org/base-image
             tag: edge
-            docker-cve-scan: true
             snyk-organization: org
             cis-docker-image-scan: true
             bats-test: true
             container-name: base-image-test
             filters: *on-push-master
-            
+
         - executor-tools/publish:
             shell: secrethub run -- /bin/sh -eo pipefail
             name: Release
             context: team-context
             image: org/base-image
             release-tag: stable
-            filters: *on-tag-master      
+            filters: *on-tag-master

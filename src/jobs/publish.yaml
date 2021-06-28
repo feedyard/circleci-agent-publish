@@ -24,7 +24,7 @@ parameters:
   pull-tag:
     description: Value for tag to pull and make publish release
     type: string
-    default: dev.$CIRCLE_SHA1
+    default: dev.${CIRCLE_SHA1:0:7}
 
   release-tag:
     description: Value for an additional release tag.
