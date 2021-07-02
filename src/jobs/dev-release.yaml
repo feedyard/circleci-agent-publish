@@ -31,6 +31,11 @@ parameters:
     type: string
     default: dev.${CIRCLE_SHA1:0:7}
 
+  tag-annotation:
+    description: Additional text prepended to semantic version tag
+    type: string
+    default: ""
+
   registry:
     description: Name of registry
     type: string
@@ -135,7 +140,7 @@ steps:
       dockerfile: << parameters.dockerfile >>
       path: << parameters.path >>
       image: << parameters.image >>
-      tag: << parameters.tag >>
+      tag: << parameters.tag-annotation >><< parameters.tag >>
       registry: << parameters.registry >>
       extra-build-args: << parameters.extra-build-args >>
   - when:
@@ -153,7 +158,7 @@ steps:
         - cve-scan:
             registry: << parameters.registry >>
             image: << parameters.image >>
-            tag: << parameters.tag >>
+            tag: << parameters.tag-annotation >><< parameters.tag >>
             snyk-organization: << parameters.snyk-organization >>
             snyk-token: << parameters.snyk-token >>
             skip-base-image: << parameters.skip-base-image >>
@@ -166,7 +171,7 @@ steps:
         - bats:
             registry: << parameters.registry >>
             image: << parameters.image >>
-            tag: << parameters.tag >>
+            tag: << parameters.tag-annotation >><< parameters.tag >>
             container-name: << parameters.container-name >>
             entry-point: << parameters.entry-point >>
             test-path: << parameters.test-path >>
@@ -176,10 +181,10 @@ steps:
       requires:
         - build
       steps:
-        - bats:
+        - inspec:
             registry: << parameters.registry >>
             image: << parameters.image >>
-            tag: << parameters.tag >>
+            tag: << parameters.tag-annotation >><< parameters.tag >>
             container-name: << parameters.container-name >>
             entry-point: << parameters.entry-point >>
             test-path: << parameters.test-path >>
@@ -190,4 +195,4 @@ steps:
   - push:
       registry: << parameters.registry >>
       image: << parameters.image >>
-      tag: << parameters.tag >>
+      tag: << parameters.tag-annotation >><< parameters.tag >>

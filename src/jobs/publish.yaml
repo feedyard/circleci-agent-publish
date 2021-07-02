@@ -26,6 +26,11 @@ parameters:
     type: string
     default: dev.${CIRCLE_SHA1:0:7}
 
+  tag-annotation:
+    description: Additional text for semantic version tag
+    type: string
+    default: ""
+
   release-tag:
     description: Value for an additional release tag.
     type: string
@@ -61,21 +66,21 @@ steps:
   - pull:
       registry: << parameters.registry >>
       image: << parameters.image >>
-      tag: << parameters.pull-tag >>
+      tag: << parameters.tag-annotation >><< parameters.pull-tag >>
   - tag:
       registry: << parameters.registry >>
       image: << parameters.image >>
-      tag: << parameters.pull-tag >>
-      release: $CIRCLE_TAG
+      tag: << parameters.tag-annotation >><< parameters.pull-tag >>
+      release: << parameters.tag-annotation >>$CIRCLE_TAG
   - tag:
       registry: << parameters.registry >>
       image: << parameters.image >>
-      tag: << parameters.pull-tag >>
+      tag: << parameters.tag-annotation >><< parameters.pull-tag >>
       release: << parameters.release-tag >>
   - push:
       registry: << parameters.registry >>
       image: << parameters.image >>
-      tag: $CIRCLE_TAG
+      tag: << parameters.tag-annotation >>$CIRCLE_TAG
   - push:
       registry: << parameters.registry >>
       image: << parameters.image >>

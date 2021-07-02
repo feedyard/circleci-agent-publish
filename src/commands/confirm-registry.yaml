@@ -21,63 +21,44 @@ parameters:
     type: env_var_name
     default: DOCKER_PASSWORD
 
-  assume-aws-role:
-    description: write AWS config files from environment variables
-    type: boolean
-    default: false
-
-  aws-default-region:
-    description: Default AWS region used in .aws/credentials after assume role
-    type: string
-    default: ""
-
-  aws-image-repository:
-    description: AWS ecr image repository and name
-    type: string
-    default: ""
-
 steps:
-  - unless:
+  - run:
       name: Confirm Docker registry environment variables are configured and correct
-      condition: << parameters.assume-aws-role >>
-      steps:
-        - run:
-            name: Confirm Docker registry environment variables are configured and correct
-            command: |
-              if [ ! ${<< parameters.registry-login >>-} ]; then
-                echo "registry access username is not set, will not be able to push image."
-                exit 1
-              fi
+      command: |
+        if [ ! ${<< parameters.registry-login >>-} ]; then
+          echo "registry access username is not set, will not be able to push image."
+          exit 1
+        fi
 
-              if [ ! ${<< parameters.registry-password >>-} ]; then
-                echo "registry access password is not set, will not be able to push image."
-                exit 1
-              fi
-        - run:
-            name: Confirm Docker registry login
-            command: |
-              echo 'write to .docker/config.json is secure in ephemeral runtime environment'
-              echo ${<< parameters.registry-password >>} | docker login -u ${<< parameters.registry-login >>} --password-stdin << parameters.registry >>
-  - when:
-      name: Using AWS Elastic Container Registry
-      condition: << parameters.assume-aws-role >>
-      steps:
-        - run:
-            name: Assume AWS role and obtain ecr get-login-password
-            command: |
-              aws sts assume-role --output json --role-arn << parameters.assume-aws-role >> --role-session-name "circleci executor -build pipeline" > .temp_credentials || { echo 'sts failure!' ; exit 1; }
+        if [ ! ${<< parameters.registry-password >>-} ]; then
+          echo "registry access password is not set, will not be able to push image."
+          exit 1
+        fi
+  - run:
+      name: Confirm Docker registry login
+      command: |
+        echo 'write to .docker/config.json is secure in ephemeral runtime environment'
+        echo ${<< parameters.registry-password >>} | docker login -u ${<< parameters.registry-login >>} --password-stdin << parameters.registry >>
+  # - when:
+  #     name: Using AWS Elastic Container Registry
+  #     condition: << parameters.assume-aws-role >>
+  #     steps:
+  #       - run:
+  #           name: Assume AWS role and obtain ecr get-login-password
+  #           command: |
+  #             aws sts assume-role --output json --role-arn << parameters.assume-aws-role >> --role-session-name "circleci executor -build pipeline" > .temp_credentials || { echo 'sts failure!' ; exit 1; }
 
-              ACCESS_KEY=$(cat .temp_credentials | jq -r ".Credentials.AccessKeyId")
-              SECRET_KEY=$(cat .temp_credentials | jq -r ".Credentials.SecretAccessKey")
-              SESSION_TOKEN=$(cat .temp_credentials | jq -r ".Credentials.SessionToken")
-              EXPIRATION=$(cat .temp_credentials | jq -r ".Credentials.Expiration")
+  #             ACCESS_KEY=$(cat .temp_credentials | jq -r ".Credentials.AccessKeyId")
+  #             SECRET_KEY=$(cat .temp_credentials | jq -r ".Credentials.SecretAccessKey")
+  #             SESSION_TOKEN=$(cat .temp_credentials | jq -r ".Credentials.SessionToken")
+  #             EXPIRATION=$(cat .temp_credentials | jq -r ".Credentials.Expiration")
 
-              cat \<<EOF > ~/.aws/credentials
-              [default]
-              aws_access_key_id=${ACCESS_KEY}
-              aws_secret_access_key=${SECRET_KEY}
-              aws_session_token=${SESSION_TOKEN}
-              region=<< parameters.aws-default-region >>
-              EOF
+  #             cat \<<EOF > ~/.aws/credentials
+  #             [default]
+  #             aws_access_key_id=${ACCESS_KEY}
+  #             aws_secret_access_key=${SECRET_KEY}
+  #             aws_session_token=${SESSION_TOKEN}
+  #             region=<< parameters.aws-default-region >>
+  #             EOF
 
-              aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin << parameters.aws-image-repository >>
+  #             aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin << parameters.aws-image-repository >>
