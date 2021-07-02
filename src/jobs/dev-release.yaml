@@ -142,7 +142,8 @@ steps:
       name: perform CIS Docker Benchmark section 4 scan
       condition: << parameters.cis-docker-image-scan >>
       steps:
-        - cis-scan
+        - cis-scan:
+            dockerfile: << parameters.dockerfile >>
   - when:
       name: Perform snyk cve scan
       condition: << parameters.snyk-organization >>
