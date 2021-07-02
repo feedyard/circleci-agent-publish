@@ -117,7 +117,8 @@ parameters:
 steps:
   - checkout
   - setup_remote_docker
-  - lint
+  - lint:
+      dockerfile: << parameters.dockerfile >>
   - when:
       name: Run after_checkout lifecycle hook steps.
       condition: << parameters.after-checkout >>
