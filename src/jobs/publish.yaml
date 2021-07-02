@@ -70,12 +70,12 @@ steps:
   - tag:
       registry: << parameters.registry >>
       image: << parameters.image >>
-      tag: << parameters.tag-annotation >><< parameters.pull-tag >>
+      tag: << parameters.pull-tag >>
       release: << parameters.tag-annotation >>$CIRCLE_TAG
   - tag:
       registry: << parameters.registry >>
       image: << parameters.image >>
-      tag: << parameters.tag-annotation >><< parameters.pull-tag >>
+      tag: << parameters.pull-tag >>
       release: << parameters.release-tag >>
   - push:
       registry: << parameters.registry >>
