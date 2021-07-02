@@ -151,7 +151,9 @@ steps:
             dockerfile: << parameters.dockerfile >>
   - when:
       name: Perform snyk cve scan
-      condition: << parameters.snyk-organization >>
+      condition:
+        not:
+          equals: [ "", << parameters.snyk-organization >> ]
       requires:
         - build
       steps:
