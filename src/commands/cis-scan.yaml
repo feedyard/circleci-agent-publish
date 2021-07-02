@@ -4,6 +4,11 @@ description: conftest for CIS Docker Benchmarks section 4
 
 parameters:
 
+  dockerfile:
+    description: Name of dockerfile
+    type: string
+    default: Dockerfile
+
   cis-policy-config:
     description: .opacisrc level 1 template
     type: string
@@ -29,7 +34,7 @@ steps:
       command: |
         conftest pull https://raw.githubusercontent.com/ncheneweth/opa-dockerfile-benchmarks/master/policy/cis-docker-benchmark.rego
   - run:
-      name: set cis level 1 default if .opacisrc is not present 
+      name: set cis level 1 default if .opacisrc is not present
       command: |
         if [[ ! -f ".conftest/cis-benchmark-policy.yaml" ]]; then
           mkdir -p .conftest
@@ -53,4 +58,4 @@ steps:
   - run:
       name: evaluate Dockerfile
       command: |
-        conftest test Dockerfile --policy . --data .conftest
+        conftest test << parameters.dockerfile >> --policy . --data .conftest
