@@ -161,6 +161,7 @@ steps:
             registry: << parameters.registry >>
             image: << parameters.image >>
             tag: << parameters.tag-annotation >><< parameters.tag >>
+            dockerfile: << parameters.dockerfile >>
             snyk-organization: << parameters.snyk-organization >>
             snyk-token: << parameters.snyk-token >>
             skip-base-image: << parameters.skip-base-image >>
