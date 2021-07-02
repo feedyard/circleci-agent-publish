@@ -51,6 +51,11 @@ parameters:
     type: env_var_name
     default: DOCKER_PASSWORD
 
+  docker-cve-scan:
+    description: perform snyk.io docker cve scan
+    type: boolean
+    default: false
+
   snyk-organization:
     description: Trigger Scan results related to repository associated with organization created at snyk.io
     type: string
@@ -151,9 +156,7 @@ steps:
             dockerfile: << parameters.dockerfile >>
   - when:
       name: Perform snyk cve scan
-      condition:
-        not:
-          equals: [ "", << parameters.snyk-organization >> ]
+      condition: << parameters.docker-cve-scan >>
       requires:
         - build
       steps:
