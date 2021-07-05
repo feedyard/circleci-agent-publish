@@ -22,10 +22,6 @@ parameters:
     type: string
     default: "1.3.0"
 
-  inspec-version:
-    type: string
-    default: "4.38.3"
-
 steps:
   - run:
       name: install secrethub and set BASHENV is secrethub.env
@@ -50,7 +46,7 @@ steps:
   - run:
       name: install inspec
       command: |
-        gem install inspec-bin:<< parameters.inspec-version >>
+        curl https://omnitruck.chef.io/install.sh | sudo bash -s -- -P inspec
         sudo bash -c "echo '---' > /etc/chef/accepted_licenses/inspec"
         sudo bash -c "echo 'id: inspec' >> /etc/chef/accepted_licenses/inspec"
         sudo bash -c "echo 'name: Chef InSpec' >> /etc/chef/accepted_licenses/inspec"
