@@ -1,0 +1,47 @@
+# src/commands/configure-machine.yaml
+
+description: |
+  Installs required tools on standard circleci ubuntu machine executor.
+
+parameters:
+
+  conftest-version:
+    type: string
+    default: "0.25.0"
+
+  snyk-version:
+    type: string
+    default: "1.653.0"
+
+  bats-version:
+    type: string
+    default: "1.3.0"
+
+  inspec-version:
+    type: string
+    default: "4.38.3"
+
+steps:
+  - run:
+      name: install conftest
+      command: |
+        wget https://github.com/open-policy-agent/conftest/releases/download/v<< parameters.conftest-version >>/conftest_<< parameters.conftest-version >>_Linux_x86_64.tar.gz
+        tar xzf conftest_<< parameters.conftest-version >>_Linux_x86_64.tar.gz
+        sudo mv conftest /usr/local/bin
+  - run:
+      name: install snyk
+      command: npm install -g snyk@<< parameters.snyk-version >>
+  - run:
+      name: install bats
+      command: npm install -g bats@<< parameters.bats-version >>
+  - run:
+      name: install inspec
+      command: |
+        gem install inspec-bin:<< parameters.inspec-version >>
+        cat \<<EOF > /etc/chef/accepted_licenses/inspec
+        ---
+        id: inspec
+        name: Chef InSpec
+        accepting_product: inspec
+        file_format: 1
+        EOF

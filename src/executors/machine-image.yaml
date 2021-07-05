@@ -1,0 +1,17 @@
+# src/executors/machine-image.yaml
+
+description: >
+  Specifies use of a standard circleci machine vm image for a build job.
+
+parameters:
+  image-name:
+    default: ubuntu-2004:202104-01
+    type: string
+  resource-class:
+    type: enum
+    default: medium
+    enum: [small, medium, medium+, large, xlarge]
+
+machine:
+    image: << parameters.image-name >>
+    resource_class: << parameters.resource-class >>
