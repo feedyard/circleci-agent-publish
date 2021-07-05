@@ -47,6 +47,7 @@ steps:
       name: install inspec
       command: |
         curl https://omnitruck.chef.io/install.sh | sudo bash -s -- -P inspec
+        sudo mkdir -p /etc/chef/accepted_licenses
         sudo bash -c "echo '---' > /etc/chef/accepted_licenses/inspec"
         sudo bash -c "echo 'id: inspec' >> /etc/chef/accepted_licenses/inspec"
         sudo bash -c "echo 'name: Chef InSpec' >> /etc/chef/accepted_licenses/inspec"
