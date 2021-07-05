@@ -12,6 +12,11 @@ parameters:
     type: string
     default: /bin/bash -eo pipefail
 
+  secrethub-env:
+    description: default file for secrethub.env seutp
+    type: string
+    default: secrethub.env
+
   dockerfile:
     description: Name of dockerfile
     type: string
@@ -142,6 +147,7 @@ steps:
       conftest-version: << parameters.conftest-version >>
       snyk-version: << parameters.snyk-version >>
       bats-version: << parameters.bats-version >>
+      secrethub-env: << parameters.secrethub-env >>
   - lint:
       dockerfile: << parameters.dockerfile >>
   - when:
