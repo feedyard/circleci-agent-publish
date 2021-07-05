@@ -10,7 +10,7 @@ parameters:
   shell:
     description: default shell invocation. Override to support different shells or tools like secrethub.io
     type: string
-    default: bash | set +o pipefail
+    default: /bin/bash -eo pipefail
 
   dockerfile:
     description: Name of dockerfile
