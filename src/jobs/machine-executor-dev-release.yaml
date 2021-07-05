@@ -121,10 +121,6 @@ parameters:
     type: string
     default: "1.3.0"
 
-  inspec-version:
-    type: string
-    default: "4.38.3"
-
   after-checkout:
     description: Optional steps to run after checking out the code.
     type: steps
@@ -146,7 +142,6 @@ steps:
       conftest-version: << parameters.conftest-version >>
       snyk-version: << parameters.snyk-version >>
       bats-version: << parameters.bats-version >>
-      inspec-version: << parameters.inspec-version >>
   - lint:
       dockerfile: << parameters.dockerfile >>
   - when:
