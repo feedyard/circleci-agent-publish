@@ -47,14 +47,12 @@ steps:
   - run:
       name: install bats
       command: npm install -g bats@<< parameters.bats-version >>
-  # - run:
-  #     name: install inspec
-  #     command: |
-  #       gem install inspec-bin:<< parameters.inspec-version >>
-  #       cat \<<EOF > /etc/chef/accepted_licenses/inspec
-  #       ---
-  #       id: inspec
-  #       name: Chef InSpec
-  #       accepting_product: inspec
-  #       file_format: 1
-  #       EOF
+  - run:
+      name: install inspec
+      command: |
+        gem install inspec-bin:<< parameters.inspec-version >>
+        sudo bash -c "echo '---' > /etc/chef/accepted_licenses/inspec"
+        sudo bash -c "echo 'id: inspec' >> /etc/chef/accepted_licenses/inspec"
+        sudo bash -c "echo 'name: Chef InSpec' >> /etc/chef/accepted_licenses/inspec"
+        sudo bash -c "echo 'accepting_product: inspec' >> /etc/chef/accepted_licenses/inspec"
+        sudo bash -c "echo 'file_format: 1' >> /etc/chef/accepted_licenses/inspec"
