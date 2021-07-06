@@ -1,8 +1,11 @@
 # src/jobs/dev-release.yaml
 
-description: Check, build, and optionally deploy a Docker image.
+description: Validate, build, and push a Docker image.
 
-executor: machine-image
+executor:
+  name: machine-image
+  image-name: << parameters.executor-image-name >>
+  resource-class: << parameters.executor-resource-class >>
 shell: << parameters.shell >>
 
 parameters:
@@ -12,10 +15,16 @@ parameters:
     type: string
     default: /bin/bash -eo pipefail
 
-  secrethub-env:
-    description: default file for secrethub.env seutp
+  executor-image-name:
+    description: specify machine executor
     type: string
-    default: secrethub.env
+    default: ubuntu-2004:202104-01
+
+  executor-resource-class:
+    description: specify executor resource class. Default is medium.
+    type: enum
+    enum: [medium, large, xlarge, 2xlarge]
+    default: medium
 
   dockerfile:
     description: Name of dockerfile
@@ -147,7 +156,6 @@ steps:
       conftest-version: << parameters.conftest-version >>
       snyk-version: << parameters.snyk-version >>
       bats-version: << parameters.bats-version >>
-      secrethub-env: << parameters.secrethub-env >>
   - lint:
       dockerfile: << parameters.dockerfile >>
   - when:

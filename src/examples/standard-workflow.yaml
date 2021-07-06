@@ -1,16 +1,13 @@
 # src/examples/standard-workflow.yaml
 
 description: |
-  A standard workflow. Git push triggers dev-build, tag for release.
-  Uses docker.io by default and uses secrethub to set access credentials in ENV variables.
-  Includes snyk cve scan, use of conftest (open policy agent) for cis docker image benchmarks
-  and bats configuration test of resulting image.
+  Standard workflow demonstrating use of common features.
 
 usage:
   version: 2.1
 
   orbs:
-    executor-tools: feedyard/executor-tools@dev:2.0.0
+    executor-tools: feedyard/executor-tools@2.7.0
 
   on-push-master: &on-push-master
     branches:
@@ -26,24 +23,28 @@ usage:
 
   workflows:
     version: 2
-    di-circleci-base-image-pipeline:
+    docker-image-alpine-pipeline:
       jobs:
         - executor-tools/dev-release:
-            shell: secrethub run -- /bin/sh -eo pipefail
-            name: "dev-build"
+            shell: secrethub run -- /bin/sh -eo pipefail  # use secrethub to inject env vars
+            name: dev-build
             context: team-context
-            image: org/base-image
-            tag: edge
-            snyk-organization: org
-            cis-docker-image-scan: true
+            image: org/image-name
+            tag: edge                                     # tag dev build with 'edge'
+            cis-docker-image-scan: true                   # perform conftest-based CIS scan
+            docker-cve-scan: true                         # use snyk to scan for vulnerabilities
+            snyk-organization: org-name
             bats-test: true
-            container-name: base-image-test
+            test-path: test                               # location of bats test files
+            entry-point: /bin/ash                         # entrypoint for 'docker run' during tests
+            container-name: run-docker-alpine-image       # image runtime name during tests
             filters: *on-push-master
 
-        - executor-tools/publish:
+        - executor-tools/publish:                         # tag and publish successful dev-build
             shell: secrethub run -- /bin/sh -eo pipefail
-            name: Release
+            name: release
             context: team-context
-            image: org/base-image
-            release-tag: stable
+            pull-tag: edge
+            image: org/image-name
+            release-tag: latest
             filters: *on-tag-master

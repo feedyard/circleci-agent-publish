@@ -1,36 +1,30 @@
 # src/commands/configure-machine.yaml
 
 description: |
-  Installs required tools on standard circleci ubuntu machine executor.
+  Install additional tools on standard circleci ubuntu machine executor.
+  Note. secrethub and inspec install latest.
 
 parameters:
 
-  secrethub-env:
-    description: default file for secrethub.env seutp
-    type: string
-    default: secrethub.env
-
   conftest-version:
+    description: specify conftest version
     type: string
-    default: "0.25.0"
 
   snyk-version:
+    description: specify snyk version
     type: string
-    default: "1.653.0"
 
   bats-version:
+    description: specify bats version
     type: string
-    default: "1.3.0"
 
 steps:
   - run:
-      name: install secrethub and set BASHENV is secrethub.env
+      name: install secrethub
       command: |
         curl -sLJO https://deb.secrethub.io/amd64
         sudo dpkg -i secrethub-cli-amd64.deb
         rm secrethub-cli-amd64.deb
-        secrethub inject -i << parameters.secrethub-env >> -o $BASH_ENV
-        source $BASH_ENV
   - run:
       name: install conftest
       command: |

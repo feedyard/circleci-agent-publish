@@ -38,6 +38,7 @@ usage:
                 only: master
               tags:
                 ignore: /.*/
+
         - executor-tools/publish:
             image: my-circleci-executor
             after-publish:

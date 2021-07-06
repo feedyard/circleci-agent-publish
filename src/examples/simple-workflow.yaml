@@ -9,7 +9,7 @@ usage:
   version: 2.1
 
   orbs:
-    executor-tools: feedyard/executor-tools@2.0.0
+    executor-tools: feedyard/executor-tools@2.7.0
 
   workflows:
     version: 2

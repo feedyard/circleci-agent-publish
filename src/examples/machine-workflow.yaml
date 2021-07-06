@@ -1,0 +1,54 @@
+# src/examples/machine-workflow.yaml
+
+description: |
+  A standard workflow using a machine executor. Git push triggers dev-build, tag for release.
+  Uses docker.io by default and uses secrethub to set access credentials in ENV variables.
+  Includes snyk cve scan, use of conftest (open policy agent) for cis docker image benchmarks
+  and bats configuration test of resulting image.
+
+usage:
+  version: 2.1
+
+  orbs:
+    executor-tools: feedyard/executor-tools@dev:2.7.0
+
+  on-push-master: &on-push-master
+    branches:
+      only: /master/
+    tags:
+      ignore: /.*/
+
+  on-tag-master: &on-tag-master
+    branches:
+      ignore: /.*/
+    tags:
+      only: /.*/
+
+  workflows:
+    version: 2
+    di-circleci-base-image-pipeline:
+      jobs:
+
+        - executor-tools/machine-executor-dev-release:
+            name: alpine-dev-build
+            context: twdps-di
+            secrethub-env: "secrethub.env"
+            dockerfile: Dockerfile.alpine
+            image: org/base-image
+            tag: alpine-edge
+            docker-cve-scan: true
+            snyk-organization: twdps
+            cis-docker-image-scan: true
+            skip-base-image: false
+            bats-test: true
+            test-path: test
+            container-name: base-image-alpine-edge
+            filters: *on-push-master
+
+        - executor-tools/publish:
+            shell: secrethub run -- /bin/sh -eo pipefail
+            name: alpine-release
+            context: team-context
+            image: org/base-image
+            release-tag: stable
+            filters: *on-tag-master

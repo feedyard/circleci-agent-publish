@@ -1,0 +1,75 @@
+# src/examples/tag-annotations.yaml
+
+description: |
+  Add annotation to tags during a multi-image build.
+
+  In this example, both an alpine and slim version of an executor are built, with the
+  tag-annotion added for clarity.
+
+usage:
+  version: 2.1
+
+  orbs:
+    executor-tools: feedyard/executor-tools@2.7.0
+
+  on-push-master: &on-push-master
+    branches:
+      only: /master/
+    tags:
+      ignore: /.*/
+
+  on-tag-master: &on-tag-master
+    branches:
+      ignore: /.*/
+    tags:
+      only: /.*/
+
+  workflows:
+    version: 2
+    alpine-image-pipeline:
+      jobs:
+        - executor-tools/dev-release:
+            name: alpine-dev-build
+            context: team-context
+            dockerfile: Dockerfile.alpine
+            image: org/image-name
+            tag: alpine-edge
+            docker-cve-scan: true
+            snyk-organization: org-name
+            cis-docker-image-scan: true
+            skip-base-image: true
+            inspec-test: true
+            test-path: teste
+            container-name: run-alpine-image-edge
+            filters: *on-push-master
+
+        - executor-tools/publish:
+            name: alpine-release
+            context: team-context
+            pull-tag: alpine-edge
+            tag-annotation: alpine-      # results in 'alpine-' prepended to tag. e.g., :alpine-0.0.1'
+            image: org/image-name
+            release-tag: alpine-latest
+            filters: *on-tag-master
+
+    di-circleci-base-slim-image-pipeline:
+      jobs:
+        - executor-tools/dev-release:
+            name: slim-dev-build
+            context: team-context
+            dockerfile: Dockerfile.slim
+            image: org/image-name
+            tag: slim-edge
+            bats-test: true
+            test-path: test
+            container-name: run-slim-image-edge
+            filters: *on-push-master
+
+        - executor-tools/publish:
+            name: slim-release
+            context: team-context
+            pull-tag: slim-edge
+            tag-annotation: slim-       # results in 'slim-' prepended to tag. e.g., :slim-0.0.1'
+            image: org/image-name
+            release-tag: slim-latest
+            filters: *on-tag-master

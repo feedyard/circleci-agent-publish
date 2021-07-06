@@ -9,25 +9,6 @@ parameters:
     type: string
     default: Dockerfile
 
-  cis-policy-config:
-    description: .opacisrc level 1 template
-    type: string
-    default: |
-      cispolicyconfig:
-        level_2_benchmark: false
-        run_as_user_required: true
-        approved_base_image_not_required: true
-        approved_base_images:
-          -
-        images_not_treated_as_immutable: false
-        only_necessary_packages_allowed: true
-        healthcheck_required: false
-        dockerfile_scanned_for_secrets: true
-        packages_verified: true
-      setuid:
-        setuid_or_setgid_values_allow_escalation: false
-        docker_content_trust: false
-
 steps:
   - run:
       name: pull policy

@@ -2,7 +2,10 @@
 
 description: Check, build, and optionally deploy a Docker image.
 
-executor: di-circleci-base-image
+executor:
+  name: di-circleci-base-image
+  image-name: << parameters.executor-image-name >>
+  resource-class: << parameters.executor-resource-class >>
 shell: << parameters.shell >>
 
 parameters:
@@ -11,6 +14,17 @@ parameters:
     description: default shell invocation. Override to support different shells or tools like secrethub.io
     type: string
     default: /bin/sh -eo pipefail
+
+  executor-image-name:
+    description: specify machine executor
+    type: string
+    default: twdps/di-circleci-base-image:alpine-stable
+
+  executor-resource-class:
+    description: specify executor resource class. Default is medium.
+    type: enum
+    enum: [small, medium, medium+, large, xlarge, 2xlarge, 2xlarge+]
+    default: medium
 
   dockerfile:
     description: Name of dockerfile

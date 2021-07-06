@@ -1,20 +1,25 @@
 # src/executors/di-circleci-base-image.yaml
 
 description: >
-  orb-executor-tools uses the di-circleci-base-image convenience image, an Alpine Linux-based circleci
-  docker executor. The image includes many tools well suited to building and testing docker images
-  used in infrastructure-as-code pipelines or to support cloud-native delivery platforms.
+  orb-executor-tools uses the alpine based di-circleci-base-image convenience image. The
+  image includes many tools well suited to building and testing docker images used in
+  infrastructure-as-code pipelines or to support cloud-native delivery platforms.
 
-  https://hub.docker.com/repository/docker/twdps/di-circleci-remote-docker
   https://hub.docker.com/repository/docker/twdps/di-circleci-base-image
+  https://hub.docker.com/repository/docker/twdps/di-circleci-remote-docker
 
 parameters:
-  resource-class:
-    type: enum
-    default: medium
-    enum: [small, medium, medium+, large, xlarge]
 
-resource_class: <<parameters.resource-class>>
+  image-name:
+    description: specify circleci docker executor
+    type: string
+
+  resource-class:
+    description: specify the resouce class for the image
+    type: enum
+    enum: [small, medium, medium+, large, xlarge, 2xlarge, 2xlarge+]
+
+resource_class: << parameters.resource-class >>
 
 docker:
-  - image: twdps/di-circleci-base-image:stable
+  - image: << parameters.image-name >>

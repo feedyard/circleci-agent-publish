@@ -1,6 +1,7 @@
 # src/commands/lint.yaml
 
-description: run Hadolint against Dockerfile
+description: |
+  Run Hadolint against Dockerfile. Note: uses latest versino of hadolint docker image.
 
 parameters:
 
